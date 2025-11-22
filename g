@@ -755,7 +755,6 @@ local Themes = {
 
 local Library = {
 	Version = "1.2.2",
-
 	OpenFrames = {},
 	Options = {},
 	Themes = Themes.Names,
@@ -4499,8 +4498,8 @@ Components.Window = (function()
 		})
 
 		Window.ContainerCanvas = New("Frame", {
-    Size = UDim2.new(1, -Window.TabWidth - 32, 1, -80), -- Уменьшили с -102 до -80
-    Position = UDim2.fromOffset(Window.TabWidth + 26, 68), -- Подняли с 90 до 68
+    Size = UDim2.new(1, -Window.TabWidth - 32, 1, -80), 
+    Position = UDim2.fromOffset(Window.TabWidth + 26, 45),
     BackgroundTransparency = 1,
     ClipsDescendants = true,
 }, {
