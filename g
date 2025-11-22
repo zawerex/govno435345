@@ -4475,22 +4475,6 @@ Components.Window = (function()
 
 		Window.TabFrame = TabFrame
 
-Window.TabDisplay = New("TextLabel", {
-    RichText = true,
-    Text = "Tab",
-    TextTransparency = 0,
-    FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
-    TextSize = 28,
-    TextXAlignment = "Center",
-    TextYAlignment = "Center",
-    Size = UDim2.new(1, 0, 0, 28), 
-    Position = UDim2.fromOffset(0, 56),
-    BackgroundTransparency = 1,
-    ThemeTag = {
-        TextColor3 = "Text",
-    },
-})
-
 		Window.ContainerHolder = New("Frame", {
 			Size = UDim2.fromScale(1, 1),
 			BackgroundTransparency = 1,
