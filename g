@@ -755,6 +755,7 @@ local Themes = {
 
 local Library = {
 	Version = "1.2.2",
+
 	OpenFrames = {},
 	Options = {},
 	Themes = Themes.Names,
@@ -3182,6 +3183,7 @@ Components.Tab = (function()
 		TabModule.Tabs[Tab].SetTransparency(0.89)
 		TabModule.Tabs[Tab].Selected = true
 
+		Window.TabDisplay.Text = TabModule.Tabs[Tab].Name
 		Window.SelectorPosMotor:setGoal(Spring(TabModule:GetCurrentTabPos(), { frequency = 6 }))
 
 		if PreviousTab > 0 and PreviousTab ~= Tab and TabModule.Tabs[PreviousTab] and TabModule.Tabs[Tab] then
@@ -4486,6 +4488,22 @@ Components.Window = (function()
 
 		Window.TabFrame = TabFrame
 
+		Window.TabDisplay = New("TextLabel", {
+			RichText = true,
+			Text = "Tab",
+			TextTransparency = 1,
+			FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
+			TextSize = 28,
+			TextXAlignment = "Center",
+			TextYAlignment = "Center",
+			Size = UDim2.new(1, -16, 0, 28),
+			Position = UDim2.fromOffset(Window.TabWidth + 26, 56),
+			BackgroundTransparency = 1,
+			ThemeTag = {
+				TextColor3 = "Text",
+			},
+		})
+
 		Window.ContainerHolder = New("Frame", {
 			Size = UDim2.fromScale(1, 1),
 			BackgroundTransparency = 1,
@@ -4498,14 +4516,14 @@ Components.Window = (function()
 		})
 
 		Window.ContainerCanvas = New("Frame", {
-    Size = UDim2.new(1, -Window.TabWidth - 32, 1, -80), 
-    Position = UDim2.fromOffset(Window.TabWidth + 26, 45),
-    BackgroundTransparency = 1,
-    ClipsDescendants = true,
-}, {
-    Window.ContainerAnim,
-    Window.ContainerHolder
-})
+			Size = UDim2.new(1, -Window.TabWidth - 32, 1, -102),
+			Position = UDim2.fromOffset(Window.TabWidth + 26, 90),
+			BackgroundTransparency = 1,
+			ClipsDescendants = true,
+		}, {
+			Window.ContainerAnim,
+			Window.ContainerHolder
+		})
 
 		local backgroundTransparency = Config.BackgroundTransparency
 		if backgroundTransparency == nil then
@@ -4573,6 +4591,7 @@ Components.Window = (function()
 		end
 		
 		table.insert(rootChildren, Window.AcrylicPaint.Frame)
+		table.insert(rootChildren, Window.TabDisplay)
 		table.insert(rootChildren, Window.ContainerCanvas)
 		table.insert(rootChildren, TabFrame)
 		table.insert(rootChildren, ResizeStartFrame)
