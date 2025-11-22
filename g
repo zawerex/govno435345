@@ -3183,7 +3183,6 @@ Components.Tab = (function()
 		TabModule.Tabs[Tab].SetTransparency(0.89)
 		TabModule.Tabs[Tab].Selected = true
 
-		Window.TabDisplay.Text = TabModule.Tabs[Tab].Name
 		Window.SelectorPosMotor:setGoal(Spring(TabModule:GetCurrentTabPos(), { frequency = 6 }))
 
 		if PreviousTab > 0 and PreviousTab ~= Tab and TabModule.Tabs[PreviousTab] and TabModule.Tabs[Tab] then
@@ -9608,7 +9607,7 @@ Library.CreateWindow = function(self, Config)
 	Library.Theme = Config.Theme or "Dark"
 
 	if Config.BackgroundImage == nil then
-		Config.BackgroundImage = "rbxassetid://10590477450"
+		Config.BackgroundImage = "rbxassetid://13196113628"
 	end
 
 	if Config.BackgroundTransparency == nil then
