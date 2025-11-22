@@ -4487,22 +4487,6 @@ Components.Window = (function()
 
 		Window.TabFrame = TabFrame
 
-		Window.TabDisplay = New("TextLabel", {
-			RichText = true,
-			Text = "Tab",
-			TextTransparency = 0,
-			FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
-			TextSize = 28,
-			TextXAlignment = "Left",
-			TextYAlignment = "Center",
-			Size = UDim2.new(1, -16, 0, 28),
-			Position = UDim2.fromOffset(Window.TabWidth + 26, 56),
-			BackgroundTransparency = 1,
-			ThemeTag = {
-				TextColor3 = "Text",
-			},
-		})
-
 		Window.ContainerHolder = New("Frame", {
 			Size = UDim2.fromScale(1, 1),
 			BackgroundTransparency = 1,
@@ -4515,14 +4499,14 @@ Components.Window = (function()
 		})
 
 		Window.ContainerCanvas = New("Frame", {
-			Size = UDim2.new(1, -Window.TabWidth - 32, 1, -102),
-			Position = UDim2.fromOffset(Window.TabWidth + 26, 90),
-			BackgroundTransparency = 1,
-			ClipsDescendants = true,
-		}, {
-			Window.ContainerAnim,
-			Window.ContainerHolder
-		})
+    Size = UDim2.new(1, -Window.TabWidth - 32, 1, -80), -- Уменьшили с -102 до -80
+    Position = UDim2.fromOffset(Window.TabWidth + 26, 68), -- Подняли с 90 до 68
+    BackgroundTransparency = 1,
+    ClipsDescendants = true,
+}, {
+    Window.ContainerAnim,
+    Window.ContainerHolder
+})
 
 		local backgroundTransparency = Config.BackgroundTransparency
 		if backgroundTransparency == nil then
