@@ -3951,74 +3951,61 @@ Components.TitleBar = (function()
 			return Button
 		end
 
-		TitleBar.Frame = New("Frame", {
-			Size = UDim2.new(1, 0, 0, 42),
-			BackgroundTransparency = 1,
-			Parent = Config.Parent,
-		}, {
-			New("Frame", {
-				Size = UDim2.new(1, -16, 1, 0),
-				Position = UDim2.new(0, 12, 0, 0),
-				BackgroundTransparency = 1,
-			}, {
-				New("UIListLayout", {
-					Padding = UDim.new(0, 5),
-					FillDirection = Enum.FillDirection.Horizontal,
-					SortOrder = Enum.SortOrder.LayoutOrder,
-					VerticalAlignment = Enum.VerticalAlignment.Center,
-				}),
+TitleBar.Frame = New("Frame", {
+    Size = UDim2.new(1, 0, 0, 42),
+    BackgroundTransparency = 1,
+    Parent = Config.Parent,
+}, {
 
-				Config.Icon and New("ImageLabel", {
-					Image = Config.Icon,
-					Size = UDim2.fromOffset(20, 20),
-					BackgroundTransparency = 1,
-					LayoutOrder = 1,
-					ThemeTag = {
-						ImageColor3 = "Text",
-					},
-				}) or nil,
+    New("Frame", {
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 0, 0, 0),
+    }, {
+        New("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.new(0.5, 0, 0.5, 0),
+            BackgroundTransparency = 1,
+            AutomaticSize = Enum.AutomaticSize.XY,
+        }, {
+            New("UIListLayout", {
+                Padding = UDim.new(0, 5),
+                FillDirection = Enum.FillDirection.Horizontal,
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                VerticalAlignment = Enum.VerticalAlignment.Center,
+            }),
 
-				New("TextLabel", {
-					RichText = true,
-					Text = Config.Title,
-					FontFace = Font.new(
-						"rbxasset://fonts/families/GothamSSm.json",
-						Enum.FontWeight.Regular,
-						Enum.FontStyle.Normal
-					),
-					TextSize = 12,
-					TextXAlignment = "Left",
-					TextYAlignment = "Center",
-					Size = UDim2.fromScale(0, 1),
-					AutomaticSize = Enum.AutomaticSize.X,
-					BackgroundTransparency = 1,
-					LayoutOrder = Config.Icon and 2 or 1,
-					ThemeTag = {
-						TextColor3 = "Text",
-					},
-				}),
-				Config.SubTitle and New("TextLabel", {
-					RichText = true,
-					Text = Config.SubTitle,
-					TextTransparency = 0.4,
-					FontFace = Font.new(
-						"rbxasset://fonts/families/GothamSSm.json",
-						Enum.FontWeight.Regular,
-						Enum.FontStyle.Normal
-					),
-					TextSize = 12,
-					TextXAlignment = "Left",
-					TextYAlignment = "Center",
-					Size = UDim2.fromScale(0, 1),
-					AutomaticSize = Enum.AutomaticSize.X,
-					BackgroundTransparency = 1,
-					LayoutOrder = Config.Icon and 3 or 2,
-					ThemeTag = {
-						TextColor3 = "Text",
-					},
-				}) or nil,
+            Config.Icon and New("ImageLabel", {
+                Image = Config.Icon,
+                Size = UDim2.fromOffset(20, 20),
+                BackgroundTransparency = 1,
+                LayoutOrder = 1,
+                ThemeTag = {
+                    ImageColor3 = "Text",
+                },
+            }) or nil,
 
-			}),
+            New("TextLabel", {
+                RichText = true,
+                Text = Config.Title,
+                FontFace = Font.new(
+                    "rbxasset://fonts/families/GothamSSm.json",
+                    Enum.FontWeight.Regular,
+                    Enum.FontStyle.Normal
+                ),
+                TextSize = 12,
+                TextXAlignment = "Center",
+                TextYAlignment = "Center",
+                Size = UDim2.fromScale(0, 1),
+                AutomaticSize = Enum.AutomaticSize.X,
+                BackgroundTransparency = 1,
+                LayoutOrder = Config.Icon and 2 or 1,
+                ThemeTag = {
+                    TextColor3 = "Text",
+                },
+            }),
+        })
+    }),
 			New("Frame", {
 				BackgroundTransparency = 0.5,
 				Size = UDim2.new(1, 0, 0, 1),
