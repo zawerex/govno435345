@@ -4574,7 +4574,6 @@ Components.Window = (function()
 		end
 		
 		table.insert(rootChildren, Window.AcrylicPaint.Frame)
-		table.insert(rootChildren, Window.TabDisplay)
 		table.insert(rootChildren, Window.ContainerCanvas)
 		table.insert(rootChildren, TabFrame)
 		table.insert(rootChildren, ResizeStartFrame)
