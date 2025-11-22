@@ -4517,7 +4517,7 @@ Components.Window = (function()
 
 Window.ContainerCanvas = New("Frame", {
     Size = UDim2.new(1, -Window.TabWidth - 32, 1, -102),
-    Position = UDim2.fromOffset(Window.TabWidth + 26, 52),
+    Position = UDim2.fromOffset(Window.TabWidth + 26, 55),
     BackgroundTransparency = 1,
     ClipsDescendants = true,
 }, {
