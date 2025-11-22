@@ -4460,7 +4460,19 @@ Components.Window = (function()
 		local searchHeight = 28
 		local totalOffset = (Window.ShowSearch and searchHeight or 0) + imageOffset
 
-		Window.TabFrame = TabFrame
+	local TabFrame = New("Frame", {
+    Size = UDim2.new(0, Window.TabWidth, 1, Window.ShowSearch and -63 or -31),
+    Position = UDim2.new(0, 12, 0, Window.ShowSearch and 54 or 19),
+    BackgroundTransparency = 1,
+    ClipsDescendants = true,
+}, {
+    ImageFrame,
+    SearchFrame,
+    Window.TabHolder,
+    Selector,
+})
+
+Window.TabFrame = TabFrame
 
 		Window.ContainerHolder = New("Frame", {
 			Size = UDim2.fromScale(1, 1),
