@@ -1,5 +1,4 @@
 
-
 local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
@@ -1998,7 +1997,6 @@ function AcrylicBlur()
 		Creator.AddSignal(comp:GetPropertyChangedSignal("AbsolutePosition"), function()
 			onChange(comp)
 		end)
-
 		Creator.AddSignal(comp:GetPropertyChangedSignal("AbsoluteSize"), function()
 			onChange(comp)
 		end)
@@ -2998,7 +2996,6 @@ Components.Tab = (function()
 				local SectionFrame = Components.Section(SectionTitle, SubTab.Container, Icon)
 				Section.Container = SectionFrame.Container
 				Section.ScrollFrame = SubTab.Container
-
 				setmetatable(Section, Elements)
 				return Section
 			end
@@ -3876,184 +3873,204 @@ Components.Textbox = (function()
 	end
 end)()
 Components.TitleBar = (function()
-	local New = Creator.New
-	local AddSignal = Creator.AddSignal
+    local New = Creator.New
+    local AddSignal = Creator.AddSignal
 
-	local function parseColor(value)
-		if typeof(value) == "Color3" then return value end
-		if typeof(value) == "string" then
-			local hex = value:gsub("#","")
-			if #hex == 6 then
-				local r = tonumber(hex:sub(1,2), 16) or 255
-				local g = tonumber(hex:sub(3,4), 16) or 255
-				local b = tonumber(hex:sub(5,6), 16) or 255
-				return Color3.fromRGB(r,g,b)
-			end
-		end
-		return Themes[Library.Theme].SubText or Color3.fromRGB(170,170,170)
-	end
+    local function parseColor(value)
+        if typeof(value) == "Color3" then return value end
+        if typeof(value) == "string" then
+            local hex = value:gsub("#","")
+            if #hex == 6 then
+                local r = tonumber(hex:sub(1,2), 16) or 255
+                local g = tonumber(hex:sub(3,4), 16) or 255
+                local b = tonumber(hex:sub(5,6), 16) or 255
+                return Color3.fromRGB(r,g,b)
+            end
+        end
+        return Themes[Library.Theme].SubText or Color3.fromRGB(170,170,170)
+    end
 
-	return function(Config)
-		local TitleBar = {}
+    return function(Config)
+        local TitleBar = {}
 
-		local function BarButton(Icon, Pos, Parent, Callback)
-			local Button = {
-				Callback = Callback or function() end,
-			}
+        local function BarButton(Icon, Pos, Parent, Callback)
+            local Button = {
+                Callback = Callback or function() end,
+            }
 
-			Button.Frame = New("TextButton", {
-				Size = UDim2.new(0, 34, 1, -8),
-				AnchorPoint = Vector2.new(1, 0),
-				BackgroundTransparency = 1,
-				Parent = Parent,
-				Position = Pos,
-				Text = "",
-				ThemeTag = {
-					BackgroundColor3 = "Text",
-				},
-			}, {
-				New("UICorner", {
-					CornerRadius = UDim.new(0, 7),
-				}),
-				New("ImageLabel", {
-					Image = Icon,
-					Size = UDim2.fromOffset(16, 16),
-					Position = UDim2.fromScale(0.5, 0.5),
-					AnchorPoint = Vector2.new(0.5, 0.5),
-					BackgroundTransparency = 1,
-					Name = "Icon",
-					ThemeTag = {
-						ImageColor3 = "Text",
-					},
-				}),
-			})
+            Button.Frame = New("TextButton", {
+                Size = UDim2.new(0, 34, 1, -8),
+                AnchorPoint = Vector2.new(1, 0),
+                BackgroundTransparency = 1,
+                Parent = Parent,
+                Position = Pos,
+                Text = "",
+                ThemeTag = {
+                    BackgroundColor3 = "Text",
+                },
+            }, {
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, 7),
+                }),
+                New("ImageLabel", {
+                    Image = Icon,
+                    Size = UDim2.fromOffset(16, 16),
+                    Position = UDim2.fromScale(0.5, 0.5),
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    BackgroundTransparency = 1,
+                    Name = "Icon",
+                    ThemeTag = {
+                        ImageColor3 = "Text",
+                    },
+                }),
+            })
 
-			local Motor, SetTransparency = Creator.SpringMotor(1, Button.Frame, "BackgroundTransparency")
+            local Motor, SetTransparency = Creator.SpringMotor(1, Button.Frame, "BackgroundTransparency")
 
-			AddSignal(Button.Frame.MouseEnter, function()
-				SetTransparency(0.94)
-			end)
-			AddSignal(Button.Frame.MouseLeave, function()
-				SetTransparency(1, true)
-			end)
-			AddSignal(Button.Frame.MouseButton1Down, function()
-				SetTransparency(0.96)
-			end)
-			AddSignal(Button.Frame.MouseButton1Up, function()
-				SetTransparency(0.94)
-			end)
-			AddSignal(Button.Frame.MouseButton1Click, Button.Callback)
+            AddSignal(Button.Frame.MouseEnter, function()
+                SetTransparency(0.94)
+            end)
+            AddSignal(Button.Frame.MouseLeave, function()
+                SetTransparency(1, true)
+            end)
+            AddSignal(Button.Frame.MouseButton1Down, function()
+                SetTransparency(0.96)
+            end)
+            AddSignal(Button.Frame.MouseButton1Up, function()
+                SetTransparency(0.94)
+            end)
+            AddSignal(Button.Frame.MouseButton1Click, Button.Callback)
 
-			Button.SetCallback = function(Func)
-				Button.Callback = Func
-			end
+            Button.SetCallback = function(Func)
+                Button.Callback = Func
+            end
 
-			return Button
-		end
+            return Button
+        end
 
-		TitleBar.Frame = New("Frame", {
-			Size = UDim2.new(1, 0, 0, 42),
-			BackgroundTransparency = 1,
-			Parent = Config.Parent,
-		}, {
-			New("Frame", {
-				Size = UDim2.new(1, -16, 1, 0),
-				Position = UDim2.new(0, 12, 0, 0),
-				BackgroundTransparency = 1,
-			}, {
-				New("UIListLayout", {
-					Padding = UDim.new(0, 5),
-					FillDirection = Enum.FillDirection.Horizontal,
-					SortOrder = Enum.SortOrder.LayoutOrder,
-					VerticalAlignment = Enum.VerticalAlignment.Center,
-				}),
+        TitleBar.Frame = New("Frame", {
+            Size = UDim2.new(1, 0, 0, 42),
+            BackgroundTransparency = 1,
+            Parent = Config.Parent,
+        }, {
+            -- Центральный контейнер для заголовка и подзаголовка
+            New("Frame", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 0, 0, 0),
+            }, {
+                New("UIListLayout", {
+                    Padding = UDim.new(0, 0),
+                    FillDirection = Enum.FillDirection.Vertical,
+                    SortOrder = Enum.SortOrder.LayoutOrder,
+                    HorizontalAlignment = Enum.HorizontalAlignment.Center,
+                    VerticalAlignment = Enum.VerticalAlignment.Center,
+                }),
 
-				Config.Icon and New("ImageLabel", {
-					Image = Config.Icon,
-					Size = UDim2.fromOffset(20, 20),
-					BackgroundTransparency = 1,
-					LayoutOrder = 1,
-					ThemeTag = {
-						ImageColor3 = "Text",
-					},
-				}) or nil,
+                -- Контейнер для иконки и заголовка
+                New("Frame", {
+                    Size = UDim2.new(0, 0, 0, 0),
+                    AutomaticSize = Enum.AutomaticSize.XY,
+                    BackgroundTransparency = 1,
+                    LayoutOrder = 1,
+                }, {
+                    New("UIListLayout", {
+                        Padding = UDim.new(0, 5),
+                        FillDirection = Enum.FillDirection.Horizontal,
+                        SortOrder = Enum.SortOrder.LayoutOrder,
+                        VerticalAlignment = Enum.VerticalAlignment.Center,
+                    }),
 
-				New("TextLabel", {
-					RichText = true,
-					Text = Config.Title,
-					FontFace = Font.new(
-						"rbxasset://fonts/families/GothamSSm.json",
-						Enum.FontWeight.Regular,
-						Enum.FontStyle.Normal
-					),
-					TextSize = 12,
-					TextXAlignment = "Left",
-					TextYAlignment = "Center",
-					Size = UDim2.fromScale(0, 1),
-					AutomaticSize = Enum.AutomaticSize.X,
-					BackgroundTransparency = 1,
-					LayoutOrder = Config.Icon and 2 or 1,
-					ThemeTag = {
-						TextColor3 = "Text",
-					},
-				}),
-				Config.SubTitle and New("TextLabel", {
-					RichText = true,
-					Text = Config.SubTitle,
-					TextTransparency = 0.4,
-					FontFace = Font.new(
-						"rbxasset://fonts/families/GothamSSm.json",
-						Enum.FontWeight.Regular,
-						Enum.FontStyle.Normal
-					),
-					TextSize = 12,
-					TextXAlignment = "Left",
-					TextYAlignment = "Center",
-					Size = UDim2.fromScale(0, 1),
-					AutomaticSize = Enum.AutomaticSize.X,
-					BackgroundTransparency = 1,
-					LayoutOrder = Config.Icon and 3 or 2,
-					ThemeTag = {
-						TextColor3 = "Text",
-					},
-				}) or nil,
+                    Config.Icon and New("ImageLabel", {
+                        Image = Config.Icon,
+                        Size = UDim2.fromOffset(20, 20),
+                        BackgroundTransparency = 1,
+                        LayoutOrder = 1,
+                        ThemeTag = {
+                            ImageColor3 = "Text",
+                        },
+                    }) or nil,
 
-			}),
-			New("Frame", {
-				BackgroundTransparency = 0.5,
-				Size = UDim2.new(1, 0, 0, 1),
-				Position = UDim2.new(0, 0, 1, 0),
-				ThemeTag = {
-					BackgroundColor3 = "TitleBarLine",
-				},
-			}),
-		})
-		TitleBar.CloseButton = BarButton(Components.Assets.Close, UDim2.new(1, -4, 0, 4), TitleBar.Frame, function()
-			Library.Window:Dialog({
-				Title = "Close",
-				Content = "Are you sure you want to unload the interface?",
-				Buttons = {
-					{
-						Title = "Yes",
-						Callback = function()
-							Library:Destroy()
-						end,
-					},
-					{
-						Title = "No",
-					},
-				},
-			})
-		end)
-		TitleBar.MaxButton = BarButton(Components.Assets.Max, UDim2.new(1, -40, 0, 4), TitleBar.Frame, function()
-			Config.Window.Maximize(not Config.Window.Maximized)
-		end)
-		TitleBar.MinButton = BarButton(Components.Assets.Min, UDim2.new(1, -80, 0, 4), TitleBar.Frame, function()
-			Library.Window:Minimize()
-		end)
+                    New("TextLabel", {
+                        RichText = true,
+                        Text = Config.Title,
+                        FontFace = Font.new(
+                            "rbxasset://fonts/families/GothamSSm.json",
+                            Enum.FontWeight.SemiBold,
+                            Enum.FontStyle.Normal
+                        ),
+                        TextSize = 14, -- Title на 2 больше чем SubTitle
+                        TextXAlignment = "Center",
+                        TextYAlignment = "Center",
+                        Size = UDim2.fromScale(0, 1),
+                        AutomaticSize = Enum.AutomaticSize.XY,
+                        BackgroundTransparency = 1,
+                        LayoutOrder = Config.Icon and 2 or 1,
+                        ThemeTag = {
+                            TextColor3 = "Text",
+                        },
+                    }),
+                }),
 
-		return TitleBar
-	end
+                -- Подзаголовок
+                Config.SubTitle and New("TextLabel", {
+                    RichText = true,
+                    Text = Config.SubTitle,
+                    TextTransparency = 0.4,
+                    FontFace = Font.new(
+                        "rbxasset://fonts/families/GothamSSm.json",
+                        Enum.FontWeight.Regular,
+                        Enum.FontStyle.Normal
+                    ),
+                    TextSize = 12, -- SubTitle на 2 меньше чем Title
+                    TextXAlignment = "Center",
+                    TextYAlignment = "Center",
+                    Size = UDim2.fromScale(0, 1),
+                    AutomaticSize = Enum.AutomaticSize.XY,
+                    BackgroundTransparency = 1,
+                    LayoutOrder = 2,
+                    ThemeTag = {
+                        TextColor3 = "Text",
+                    },
+                }) or nil,
+            }),
+
+            New("Frame", {
+                BackgroundTransparency = 0.5,
+                Size = UDim2.new(1, 0, 0, 1),
+                Position = UDim2.new(0, 0, 1, 0),
+                ThemeTag = {
+                    BackgroundColor3 = "TitleBarLine",
+                },
+            }),
+        })
+
+        TitleBar.CloseButton = BarButton(Components.Assets.Close, UDim2.new(1, -4, 0, 4), TitleBar.Frame, function()
+            Library.Window:Dialog({
+                Title = "Close",
+                Content = "Are you sure you want to unload the interface?",
+                Buttons = {
+                    {
+                        Title = "Yes",
+                        Callback = function()
+                            Library:Destroy()
+                        end,
+                    },
+                    {
+                        Title = "No",
+                    },
+                },
+            })
+        end)
+        TitleBar.MaxButton = BarButton(Components.Assets.Max, UDim2.new(1, -40, 0, 4), TitleBar.Frame, function()
+            Config.Window.Maximize(not Config.Window.Maximized)
+        end)
+        TitleBar.MinButton = BarButton(Components.Assets.Min, UDim2.new(1, -80, 0, 4), TitleBar.Frame, function()
+            Library.Window:Minimize()
+        end)
+
+        return TitleBar
+    end
 end)()
 Components.Window = (function()
 	local Spring = Flipper.Spring.new
@@ -9001,7 +9018,6 @@ local SaveManager = {} do
 
 
 
-
 		section:AddButton({Title = "Load config", Callback = function()
 
 
@@ -10997,7 +11013,6 @@ Creator.AddSignal(RunService.Heartbeat, function()
 
 
 		local viewportSize = workspace.Camera.ViewportSize
-
 
 		local minimizerSize = activeMin.AbsoluteSize
 
