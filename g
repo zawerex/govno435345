@@ -3953,66 +3953,41 @@ Components.TitleBar = (function()
             BackgroundTransparency = 1,
             Parent = Config.Parent,
         }, {
-            -- Центральный контейнер для заголовка и подзаголовка
+            -- Простой центральный контейнер
             New("Frame", {
                 Size = UDim2.new(1, 0, 1, 0),
                 BackgroundTransparency = 1,
                 Position = UDim2.new(0, 0, 0, 0),
             }, {
                 New("UIListLayout", {
-                    Padding = UDim.new(0, 2), -- Уменьшили расстояние между Title и SubTitle
+                    Padding = UDim.new(0, 0), -- Нет отступа между элементами
                     FillDirection = Enum.FillDirection.Vertical,
                     SortOrder = Enum.SortOrder.LayoutOrder,
                     HorizontalAlignment = Enum.HorizontalAlignment.Center,
                     VerticalAlignment = Enum.VerticalAlignment.Center,
                 }),
 
-                -- Контейнер для иконки и заголовка
-                New("Frame", {
-                    Size = UDim2.new(0, 0, 0, 0),
-                    AutomaticSize = Enum.AutomaticSize.XY,
+                -- Title
+                New("TextLabel", {
+                    RichText = true,
+                    Text = Config.Title,
+                    FontFace = Font.new(
+                        "rbxasset://fonts/families/GothamSSm.json",
+                        Enum.FontWeight.SemiBold,
+                        Enum.FontStyle.Normal
+                    ),
+                    TextSize = 14, -- Title на 2 больше чем SubTitle
+                    TextXAlignment = "Center",
+                    TextYAlignment = "Bottom", -- Выравнивание по нижнему краю
+                    Size = UDim2.new(1, 0, 0, 16),
                     BackgroundTransparency = 1,
                     LayoutOrder = 1,
-                }, {
-                    New("UIListLayout", {
-                        Padding = UDim.new(0, 5),
-                        FillDirection = Enum.FillDirection.Horizontal,
-                        SortOrder = Enum.SortOrder.LayoutOrder,
-                        VerticalAlignment = Enum.VerticalAlignment.Center,
-                    }),
-
-                    Config.Icon and New("ImageLabel", {
-                        Image = Config.Icon,
-                        Size = UDim2.fromOffset(20, 20),
-                        BackgroundTransparency = 1,
-                        LayoutOrder = 1,
-                        ThemeTag = {
-                            ImageColor3 = "Text",
-                        },
-                    }) or nil,
-
-                    New("TextLabel", {
-                        RichText = true,
-                        Text = Config.Title,
-                        FontFace = Font.new(
-                            "rbxasset://fonts/families/GothamSSm.json",
-                            Enum.FontWeight.SemiBold,
-                            Enum.FontStyle.Normal
-                        ),
-                        TextSize = 14, -- Title на 2 больше чем SubTitle
-                        TextXAlignment = "Center",
-                        TextYAlignment = "Center",
-                        Size = UDim2.fromScale(0, 1),
-                        AutomaticSize = Enum.AutomaticSize.XY,
-                        BackgroundTransparency = 1,
-                        LayoutOrder = Config.Icon and 2 or 1,
-                        ThemeTag = {
-                            TextColor3 = "Text",
-                        },
-                    }),
+                    ThemeTag = {
+                        TextColor3 = "Text",
+                    },
                 }),
 
-                -- Подзаголовок
+                -- SubTitle
                 Config.SubTitle and New("TextLabel", {
                     RichText = true,
                     Text = Config.SubTitle,
@@ -4024,9 +3999,8 @@ Components.TitleBar = (function()
                     ),
                     TextSize = 12, -- SubTitle на 2 меньше чем Title
                     TextXAlignment = "Center",
-                    TextYAlignment = "Center",
-                    Size = UDim2.fromScale(0, 1),
-                    AutomaticSize = Enum.AutomaticSize.XY,
+                    TextYAlignment = "Top", -- Выравнивание по верхнему краю
+                    Size = UDim2.new(1, 0, 0, 14),
                     BackgroundTransparency = 1,
                     LayoutOrder = 2,
                     ThemeTag = {
