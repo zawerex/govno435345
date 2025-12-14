@@ -9721,11 +9721,11 @@ Library.CreateWindow = function(self, Config)
         task.wait(0.1) 
 
 local snowfallConfig = Config.SnowfallConfig or {
-    Count = 30,           -- Больше снежинок для плотности
-    Speed = 40,           -- Средняя скорость (10 было слишком медленно)
-    Sway = 25,            -- Умеренное покачивание
-    Color = Color3.fromRGB(255, 255, 255), -- Чисто белый
-    Intensity = 0.9       -- Хорошая видимость
+    Count = 50,     
+    Speed = 20,       
+    Sway = 0,
+    Color = Color3.fromRGB(255, 255, 255), 
+    Intensity = 0.7  
 }
 
         Library:AddSnowfallToWindow(snowfallConfig)
@@ -9736,7 +9736,6 @@ local snowfallConfig = Config.SnowfallConfig or {
     
     return Window
 end
-
 
 function Library:CreateMinimizer(Config)
 
@@ -11101,7 +11100,7 @@ function Library:AddSnowfallToWindow(Config)
                 snowflake.Text = "❄"
                 snowflake.TextColor3 = snowflakeColor -- Чисто белый
                 snowflake.TextSize = math.random(10, 16)
-                snowflake.BackgroundTransparency = 1
+                snowflake.BackgroundTransparency = 0.5
                 snowflake.Font = Enum.Font.SourceSans
                 snowflake.Size = UDim2.new(0, snowflake.TextSize + 4, 0, snowflake.TextSize + 4)
                 
