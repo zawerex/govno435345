@@ -9720,24 +9720,14 @@ Library.CreateWindow = function(self, Config)
     if Config.Snowfall ~= false then 
         task.wait(0.1) 
 
-        local snowfallConfig = Config.SnowfallConfig or {
-            Count = 80,
-            Speed = 10,
-            Sway = 20,
-            Color = Color3.fromRGB(255, 255, 255),
-            Intensity = 0.7
-        }
-        
-        -- Проверяем тему для выбора цвета снежинок
-        if Config.Theme == "Dark" or Config.Theme == "Darker" or Config.Theme == "AMOLED" then
-            snowfallConfig.Color = Color3.fromRGB(200, 220, 255) -- Светлее для темных тем
-        elseif Config.Theme == "Light" then
-            snowfallConfig.Color = Color3.fromRGB(100, 120, 150) -- Темнее для светлой темы
-        elseif Config.Theme == "Bloody" then
-            snowfallConfig.Color = Color3.fromRGB(255, 150, 150) -- Красноватый снег
-        end
-        
-        -- Добавляем снегопад
+local snowfallConfig = Config.SnowfallConfig or {
+    Count = 30,           -- Больше снежинок для плотности
+    Speed = 40,           -- Средняя скорость (10 было слишком медленно)
+    Sway = 25,            -- Умеренное покачивание
+    Color = Color3.fromRGB(255, 255, 255), -- Чисто белый
+    Intensity = 0.9       -- Хорошая видимость
+}
+
         Library:AddSnowfallToWindow(snowfallConfig)
     end
     
