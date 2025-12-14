@@ -1,4 +1,3 @@
-
 local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
@@ -998,7 +997,6 @@ end
 function BaseMotor:onStep(handler)
 	return self._onStep:connect(handler)
 end
-
 function BaseMotor:onStart(handler)
 	return self._onStart:connect(handler)
 end
@@ -4036,13 +4034,10 @@ Components.TitleBar = (function()
                 },
             })
         end)
-        
-        -- УБРАЛ кнопку Maximize - она больше не создается
-        // TitleBar.MaxButton = BarButton(Components.Assets.Max, UDim2.new(1, -40, 0, 4), TitleBar.Frame, function()
-        //     Config.Window.Maximize(not Config.Window.Maximized)
-        // end)
-        
-        TitleBar.MinButton = BarButton(Components.Assets.Min, UDim2.new(1, -40, 0, 4), TitleBar.Frame, function() // Сдвинул MinButton на место MaxButton
+        TitleBar.MaxButton = BarButton(Components.Assets.Max, UDim2.new(1, -40, 0, 4), TitleBar.Frame, function()
+            Config.Window.Maximize(not Config.Window.Maximized)
+        end)
+        TitleBar.MinButton = BarButton(Components.Assets.Min, UDim2.new(1, -80, 0, 4), TitleBar.Frame, function()
             Library.Window:Minimize()
         end)
 
@@ -4840,52 +4835,53 @@ Window.Root = New("Frame", {
 
 		local OldSizeX
 		local OldSizeY
-Window.Maximize = function(Value, NoPos, Instant)
-    Window.Maximized = Value
-    -- // Window.TitleBar.MaxButton.Frame.Icon.Image = Value and Components.Assets.Restore or Components.Assets.Max // ЗАКОММЕНТИРОВАТЬ
-    if Value then
-        OldSizeX = Window.Size.X.Offset
-        OldSizeY = Window.Size.Y.Offset
-    end
-    local SizeX = Value and Camera.ViewportSize.X or OldSizeX
-    local SizeY = Value and Camera.ViewportSize.Y or OldSizeY
-    SizeMotor:setGoal({
-        X = Flipper[Instant and "Instant" or "Spring"].new(SizeX, { frequency = 6 }),
-        Y = Flipper[Instant and "Instant" or "Spring"].new(SizeY, { frequency = 6 }),
-    })
-    Window.Size = UDim2.fromOffset(SizeX, SizeY)
+		Window.Maximize = function(Value, NoPos, Instant)
+			Window.Maximized = Value
+			Window.TitleBar.MaxButton.Frame.Icon.Image = Value and Components.Assets.Restore or Components.Assets.Max
 
-    if not NoPos then
-        PosMotor:setGoal({
-            X = Spring(Value and 0 or Window.Position.X.Offset, { frequency = 6 }),
-            Y = Spring(Value and 0 or Window.Position.Y.Offset, { frequency = 6 }),
-        })
-    end
-end
+			if Value then
+				OldSizeX = Window.Size.X.Offset
+				OldSizeY = Window.Size.Y.Offset
+			end
+			local SizeX = Value and Camera.ViewportSize.X or OldSizeX
+			local SizeY = Value and Camera.ViewportSize.Y or OldSizeY
+			SizeMotor:setGoal({
+				X = Flipper[Instant and "Instant" or "Spring"].new(SizeX, { frequency = 6 }),
+				Y = Flipper[Instant and "Instant" or "Spring"].new(SizeY, { frequency = 6 }),
+			})
+			Window.Size = UDim2.fromOffset(SizeX, SizeY)
 
-Creator.AddSignal(Window.TitleBar.Frame.InputBegan, function(Input)
-    if
-        Input.UserInputType == Enum.UserInputType.MouseButton1
-        or Input.UserInputType == Enum.UserInputType.Touch
-    then
-        Dragging = true
-        MousePos = Input.Position
-        StartPos = Window.Root.Position
+			if not NoPos then
+				PosMotor:setGoal({
+					X = Spring(Value and 0 or Window.Position.X.Offset, { frequency = 6 }),
+					Y = Spring(Value and 0 or Window.Position.Y.Offset, { frequency = 6 }),
+				})
+			end
+		end
 
-        --[[ // if Window.Maximized then // ЗАКОММЕНТИРОВАТЬ или УДАЛИТЬ
-        //     StartPos = UDim2.fromOffset(
-        //         Mouse.X - (Mouse.X * ((OldSizeX - 100) / Window.Root.AbsoluteSize.X)),
-        //         Mouse.Y - (Mouse.Y * (OldSizeY / Window.Root.AbsoluteSize.Y))
-        //     )
-        // end --]]
+		Creator.AddSignal(Window.TitleBar.Frame.InputBegan, function(Input)
+			if
+				Input.UserInputType == Enum.UserInputType.MouseButton1
+				or Input.UserInputType == Enum.UserInputType.Touch
+			then
+				Dragging = true
+				MousePos = Input.Position
+				StartPos = Window.Root.Position
 
-        Input.Changed:Connect(function()
-            if Input.UserInputState == Enum.UserInputState.End then
-                Dragging = false
-            end
-        end)
-    end
-end)
+				if Window.Maximized then
+					StartPos = UDim2.fromOffset(
+						Mouse.X - (Mouse.X * ((OldSizeX - 100) / Window.Root.AbsoluteSize.X)),
+						Mouse.Y - (Mouse.Y * (OldSizeY / Window.Root.AbsoluteSize.Y))
+					)
+				end
+
+				Input.Changed:Connect(function()
+					if Input.UserInputState == Enum.UserInputState.End then
+						Dragging = false
+					end
+				end)
+			end
+		end)
 
 		Creator.AddSignal(Window.TitleBar.Frame.InputChanged, function(Input)
 			if
@@ -4906,19 +4902,19 @@ end)
 			end
 		end)
 
-Creator.AddSignal(UserInputService.InputChanged, function(Input)
-    if Input == DragInput and Dragging then
-        local Delta = Input.Position - MousePos
-        Window.Position = UDim2.fromOffset(StartPos.X.Offset + Delta.X, StartPos.Y.Offset + Delta.Y)
-        PosMotor:setGoal({
-            X = Instant(Window.Position.X.Offset),
-            Y = Instant(Window.Position.Y.Offset),
-        })
+		Creator.AddSignal(UserInputService.InputChanged, function(Input)
+			if Input == DragInput and Dragging then
+				local Delta = Input.Position - MousePos
+				Window.Position = UDim2.fromOffset(StartPos.X.Offset + Delta.X, StartPos.Y.Offset + Delta.Y)
+				PosMotor:setGoal({
+					X = Instant(Window.Position.X.Offset),
+					Y = Instant(Window.Position.Y.Offset),
+				})
 
-        -- // if Window.Maximized then // 
-        -- //     Window.Maximize(false, true, true)
-        -- // end
-    end
+				if Window.Maximized then
+					Window.Maximize(false, true, true)
+				end
+			end
 
 			if
 				(Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch)
@@ -9002,7 +8998,6 @@ local SaveManager = {} do
 
 
 
-
 			local success, err = self:Load(name)
 
 
@@ -10004,7 +9999,6 @@ function Library:CreateMinimizer(Config)
 
 
 
-
 	if useAcrylic then
 
 
@@ -11000,7 +10994,6 @@ Creator.AddSignal(RunService.Heartbeat, function()
 
 
 		if newY < 0 then newY = 0 end
-
 
 		if newX > viewportSize.X - minimizerSize.X then 
 
