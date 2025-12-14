@@ -9346,142 +9346,61 @@ function InterfaceManager:LoadSettings()
     end
 end
 
-	function InterfaceManager:BuildInterfaceSection(tab)
-
-
-		assert(self.Library, "Must set InterfaceManager.Library")
-
-
-		local Library = self.Library
-
-
-		local Settings = InterfaceManager.Settings
-
-
-
-
-
-		InterfaceManager:LoadSettings()
-
-
-
-
-
-		local section = tab:AddSection("Interface", "monitor")
-
-
-		local InterfaceTheme = section:AddDropdown("InterfaceTheme", {
-
-
-			Title = "Theme",
-
-
-			Description = "Changes the interface theme.",
-
-
-			Values = Library.Themes,
-
-
-			Default = self.Library.Theme,
-
-
-			Callback = function(Value)
-
-
-				Library:SetTheme(Value)
-
-
-				Settings.Theme = Value
-
-
-				InterfaceManager:SaveSettings()
-
-
-			end
-
-
-		})
-
-
-
-
-
-		InterfaceTheme:SetValue(Settings.Theme)
-
-
-
-
-
-		if Library.UseAcrylic and not Mobile then
-
-
-			section:AddToggle("AcrylicToggle", {
-
-
-				Title = "Acrylic",
-
-
-				Description = "The blurred background requires graphic quality 8+",
-
-
-				Default = Settings.Acrylic,
-
-
-				Callback = function(Value)
-
-
-					Library:ToggleAcrylic(Value)
-
-
-					Settings.Acrylic = Value
-
-
-					InterfaceManager:SaveSettings()
-
-
-				end
-
-
-			})
-
-
-		elseif Mobile then
-
-
-			Settings.Acrylic = false
-
-
-		end
-
-
-
-
-
-		section:AddSlider("WindowTransparency", {
-
-
-			Title = "Window Transparency",
-
-
-			Description = "Adjusts the window transparency.",
-
-			Default = 1,
-			Min = 0,
-			Max = 3,
-			Rounding = 1,
-
-			Callback = function(Value)
-
-				Library:SetWindowTransparency(Value)
-
-			end
-
-		})
-
+function InterfaceManager:BuildInterfaceSection(tab)
+    assert(self.Library, "Must set InterfaceManager.Library")
+    local Library = self.Library
+    local Settings = InterfaceManager.Settings
+
+    InterfaceManager:LoadSettings()
+
+    local section = tab:AddSection("Interface", "monitor")
+
+    local InterfaceTheme = section:AddDropdown("InterfaceTheme", {
+        Title = "Theme",
+        Description = "Changes the interface theme.",
+        Values = Library.Themes,
+        Default = self.Library.Theme,
+        Callback = function(Value)
+            Library:SetTheme(Value)
+            Settings.Theme = Value
+            InterfaceManager:SaveSettings()
+        end
+    })
+
+    InterfaceTheme:SetValue(Settings.Theme)
+
+    if Library.UseAcrylic and not Mobile then
+        section:AddToggle("AcrylicToggle", {
+            Title = "Acrylic",
+            Description = "The blurred background requires graphic quality 8+",
+            Default = Settings.Acrylic,
+            Callback = function(Value)
+                Library:ToggleAcrylic(Value)
+                Settings.Acrylic = Value
+                InterfaceManager:SaveSettings()
+            end
+        })
+    elseif Mobile then
+        Settings.Acrylic = false
+    end
+
+    section:AddSlider("WindowTransparency", {
+        Title = "Window Transparency",
+        Description = "Adjusts the window transparency.",
+        Default = 1,
+        Min = 0,
+        Max = 3,
+        Rounding = 1,
+        Callback = function(Value)
+            Library:SetWindowTransparency(Value)
+        end
+    })
+
+    -- ДОБАВЛЯЕМ ТУТ TOGGLE ДЛЯ СНЕГА
     section:AddToggle("SnowfallToggle", {
         Title = "Snowfall Effect",
-        Description = "",
-        Default = Settings.SnowfallEnabled or false,
+        Description = "Toggle snowfall animation in the window",
+        Default = Settings.SnowfallEnabled or true,
         Callback = function(Value)
             if Library.Snowfall then
                 Library.Snowfall:SetVisible(Value)
@@ -9491,16 +9410,15 @@ end
         end
     })
 
-    local MenuKeybind = section:AddKeybind("MenuKeybind", { Title = "Minimize Bind", Default = Library.MinimizeKey.Name or Settings.MenuKeybind })
+    local MenuKeybind = section:AddKeybind("MenuKeybind", { 
+        Title = "Minimize Bind", 
+        Default = Library.MinimizeKey.Name or Settings.MenuKeybind 
+    })
     MenuKeybind:OnChanged(function()
         Settings.MenuKeybind = MenuKeybind.Value
         InterfaceManager:SaveSettings()
     end)
-	
     Library.MinimizeKeybind = MenuKeybind
-
-  end
-
 end
 
 Library.CreateWindow = function(self, Config)
@@ -9660,14 +9578,15 @@ Library.CreateWindow = function(self, Config)
 
 	Library:SetTheme(Config.Theme)
 
+    -- ВОТ ТУТ ДОБАВЛЯЕМ СНЕГОПАД
     if Config.Snowfall ~= false then 
-        task.wait(0.5) 
-
-local snowfallConfig = Config.SnowfallConfig or {
-    Count = 70,     
-    Speed = 15    
-}
-
+        task.wait(0.1)
+        
+        local snowfallConfig = Config.SnowfallConfig or {
+            Count = 80,           -- Количество снежинок
+            Speed = 20,           -- Скорость падения
+        }
+        
         Library:AddSnowfallToWindow(snowfallConfig)
     end
     
@@ -11018,18 +10937,21 @@ function Library:AddSnowfallToWindow(Config)
         snowContainer.ClipsDescendants = true
         snowContainer.Parent = Parent
         
-        -- Начальная видимость из настроек
-        local initialVisibility = InterfaceManager.Settings.SnowfallEnabled or Config.Enabled or true
+        -- Загружаем состояние из настроек
+        local Settings = InterfaceManager.Settings
+        local initialVisibility = Settings.SnowfallEnabled or true
         snowContainer.Visible = initialVisibility
         
         local snowflakeCount = Config.Count or 50
         local fallSpeed = Config.Speed or 60
         
+        -- Яркий белый цвет для всех снежинок
         local snowflakeColor = Color3.fromRGB(255, 255, 255)
         
         local snowflakes = {}
         local connections = {}
         
+        -- Создание круглых снежинок
         for i = 1, snowflakeCount do
             local snowflake = Instance.new("Frame")
             snowflake.Name = "SnowflakeCircle"..i
@@ -11062,6 +10984,7 @@ function Library:AddSnowfallToWindow(Config)
             }
         end
         
+        -- Границы контейнера
         local containerBounds = {
             left = 0,
             right = 1,
@@ -11071,7 +10994,9 @@ function Library:AddSnowfallToWindow(Config)
         
         local lastUpdate = tick()
         local connection = game:GetService("RunService").Heartbeat:Connect(function()
-            if not snowContainer.Visible then return end
+            if not snowContainer.Visible then 
+                return 
+            end
             
             local currentTime = tick()
             local deltaTime = currentTime - lastUpdate
@@ -11081,19 +11006,23 @@ function Library:AddSnowfallToWindow(Config)
                 local frame = snowflake.frame
                 local currentPos = frame.Position
                 
+                -- Прямое вертикальное падение
                 local newY = currentPos.Y.Scale + (snowflake.speed * deltaTime / 100)
                 local newX = currentPos.X.Scale
                 
+                -- Проверка горизонтальных границ
                 if newX < containerBounds.left then
                     newX = containerBounds.right
                 elseif newX > containerBounds.right then
                     newX = containerBounds.left
                 end
                 
+                -- Если снежинка ушла за нижнюю границу
                 if newY > containerBounds.bottom then
                     newY = containerBounds.top - 0.1
                     newX = math.random() * 0.95
                     
+                    -- Меняем размер при перерождении
                     local newSize = math.random(2, 6)
                     frame.Size = UDim2.new(0, newSize, 0, newSize)
                     snowflake.size = newSize
@@ -11116,10 +11045,6 @@ function Library:AddSnowfallToWindow(Config)
             snowContainer.Visible = visible
         end
         
-        function SnowInstance:IsVisible()
-            return snowContainer.Visible
-        end
-        
         function SnowInstance:SetSpeed(speed)
             for _, snowflake in ipairs(snowflakes) do
                 snowflake.speed = speed * math.random(0.5, 1.5)
@@ -11136,6 +11061,7 @@ function Library:AddSnowfallToWindow(Config)
         return SnowInstance
     end
     
+    -- Создаем контейнер для снега
     local snowContainer = Instance.new("Frame")
     snowContainer.Name = "SnowfallContainer"
     snowContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -11144,23 +11070,17 @@ function Library:AddSnowfallToWindow(Config)
     snowContainer.ClipsDescendants = true
     snowContainer.Parent = Library.Window.Root
     
+    -- Инициализируем снегопад
     snowfall.instance = SnowModule:Init(snowContainer, {
         Count = Config.Count or 80,
-        Speed = Config.Speed or 60,
-        Enabled = InterfaceManager.Settings.SnowfallEnabled or true
+        Speed = Config.Speed or 60
     })
     
+    -- Функции управления
     function snowfall:SetVisible(visible)
         if snowfall.instance then
             snowfall.instance:SetVisible(visible)
         end
-    end
-    
-    function snowfall:IsVisible()
-        if snowfall.instance then
-            return snowfall.instance:IsVisible()
-        end
-        return false
     end
     
     function snowfall:SetSpeed(speed)
@@ -11177,6 +11097,11 @@ function Library:AddSnowfallToWindow(Config)
     end
     
     Library.Snowfall = snowfall
+    
+    -- Устанавливаем начальную видимость из настроек
+    local Settings = InterfaceManager.Settings
+    snowfall:SetVisible(Settings.SnowfallEnabled or true)
+    
     return snowfall
 end
 
