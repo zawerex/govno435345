@@ -9718,14 +9718,13 @@ Library.CreateWindow = function(self, Config)
 	Library:SetTheme(Config.Theme)
 
     if Config.Snowfall ~= false then 
-        task.wait(0.1) 
+        task.wait(0.5) 
 
 local snowfallConfig = Config.SnowfallConfig or {
-    Count = 50,     
-    Speed = 20,       
-    Sway = 30,
-    Color = Color3.fromRGB(255, 255, 255), 
-    Intensity = 0.7  
+    Count = 100,     
+    Speed = 40,     
+    Intensity = 0.8,
+    Color = Color3.fromRGB(255, 255, 255) 
 }
 
         Library:AddSnowfallToWindow(snowfallConfig)
