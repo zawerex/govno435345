@@ -9328,7 +9328,6 @@ InterfaceManager.Settings = {
 
 	end
 
-
 function InterfaceManager:LoadSettings()
     local path = self.Folder .. "/options.json"
     if isfile(path) then
@@ -9396,17 +9395,18 @@ function InterfaceManager:BuildInterfaceSection(tab)
         end
     })
 
-    -- ДОБАВЛЯЕМ ТУТ TOGGLE ДЛЯ СНЕГА
+    -- TOGGLE ДЛЯ СНЕГА - исправленная версия
     section:AddToggle("SnowfallToggle", {
         Title = "Snowfall Effect",
         Description = "Toggle snowfall animation in the window",
         Default = Settings.SnowfallEnabled or true,
         Callback = function(Value)
-            if Library.Snowfall then
+            -- Проверяем, существует ли снегопад
+            if Library and Library.Snowfall and Library.Snowfall.SetVisible then
                 Library.Snowfall:SetVisible(Value)
+                Settings.SnowfallEnabled = Value
+                InterfaceManager:SaveSettings()
             end
-            Settings.SnowfallEnabled = Value
-            InterfaceManager:SaveSettings()
         end
     })
 
@@ -9578,17 +9578,17 @@ Library.CreateWindow = function(self, Config)
 
 	Library:SetTheme(Config.Theme)
 
-    -- ВОТ ТУТ ДОБАВЛЯЕМ СНЕГОПАД
-    if Config.Snowfall ~= false then 
-        task.wait(0.1)
-        
-        local snowfallConfig = Config.SnowfallConfig or {
-            Count = 80,           -- Количество снежинок
-            Speed = 20,           -- Скорость падения
-        }
-        
-        Library:AddSnowfallToWindow(snowfallConfig)
-    end
+if Config.Snowfall ~= false then 
+    task.wait(0.6)
+    
+    local snowfallConfig = Config.SnowfallConfig or {
+        Count = 80,
+        Speed = 20,
+    }
+    
+    Library:AddSnowfallToWindow(snowfallConfig)
+
+end
     
     InterfaceManager:SetTheme(Config.Theme)
     Library:SetTheme(Config.Theme)
@@ -10937,9 +10937,8 @@ function Library:AddSnowfallToWindow(Config)
         snowContainer.ClipsDescendants = true
         snowContainer.Parent = Parent
         
-        -- Загружаем состояние из настроек
-        local Settings = InterfaceManager.Settings
-        local initialVisibility = Settings.SnowfallEnabled or true
+        -- Используем значение из Config или по умолчанию true
+        local initialVisibility = Config.Enabled or true
         snowContainer.Visible = initialVisibility
         
         local snowflakeCount = Config.Count or 50
@@ -11073,7 +11072,8 @@ function Library:AddSnowfallToWindow(Config)
     -- Инициализируем снегопад
     snowfall.instance = SnowModule:Init(snowContainer, {
         Count = Config.Count or 80,
-        Speed = Config.Speed or 60
+        Speed = Config.Speed or 60,
+        Enabled = true  -- По умолчанию включен
     })
     
     -- Функции управления
@@ -11097,10 +11097,6 @@ function Library:AddSnowfallToWindow(Config)
     end
     
     Library.Snowfall = snowfall
-    
-    -- Устанавливаем начальную видимость из настроек
-    local Settings = InterfaceManager.Settings
-    snowfall:SetVisible(Settings.SnowfallEnabled or true)
     
     return snowfall
 end
