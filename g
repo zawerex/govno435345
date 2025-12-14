@@ -9496,6 +9496,7 @@ end
         Settings.MenuKeybind = MenuKeybind.Value
         InterfaceManager:SaveSettings()
     end)
+	
     Library.MinimizeKeybind = MenuKeybind
 
   end
