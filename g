@@ -9477,7 +9477,7 @@ end
 
 
 
-    local SnowfallToggle = section:AddToggle("SnowfallToggle", {
+local SnowfallToggle = section:AddToggle("SnowfallToggle", {
 
         Title = "Snowfall",
 
@@ -9485,30 +9485,30 @@ end
 
         Default = Settings.Snowfall == nil and true or Settings.Snowfall, 
 
-        Callback = function(Value)
+Callback = function(Value)
+    Settings.Snowfall = Value
+    InterfaceManager:SaveSettings()
+    
+    -- Немедленно применить видимость к существующему снегопаду
+    if Library.Snowfall then
+        Library.Snowfall:SetVisible(Value)
+    end
+    
+    -- Если снег включается, но снегопада нет - создать
+    if Value and not Library.Snowfall then
+        if Library.Window then
+            task.wait(0.5)
+            local config = Library.Window.SnowfallConfig or {Count = 70, Speed = 10}
+            Library:AddSnowfallToWindow(config)
+        end
+    elseif not Value and Library.Snowfall then
+        -- Если снег выключается, уничтожить снегопад
+        Library.Snowfall:Destroy()
+        Library.Snowfall = nil
 
-            Settings.Snowfall = Value
+		             end
 
-            InterfaceManager:SaveSettings()
-            
-            if Library.Window and Library.Snowfall then
-
-                Library.Snowfall:SetVisible(Value)
-                
-        
-                if Value and not Library.Snowfall.instance then
-
-                    if Library.Window.SnowfallConfig then
-
-                        Library:AddSnowfallToWindow(Library.Window.SnowfallConfig)
-
-                    else
-
-                        Library:AddSnowfallToWindow({Count = 70, Speed = 10})
-
-                    end
-
-                end
+                 end
 
             end
 
@@ -9768,18 +9768,19 @@ local snowfallConfig = Config.SnowfallConfig or {
     InterfaceManager:SetTheme(Config.Theme)
     Library:SetTheme(Config.Theme)
     
-    InterfaceManager:LoadSettings()
+InterfaceManager:LoadSettings()
+
+-- Если снег не отключен в Config окна, инициализировать
+if Config.Snowfall ~= false then
     local snowfallEnabled = InterfaceManager.Settings.Snowfall == nil and true or InterfaceManager.Settings.Snowfall
     
-    if Config.Snowfall ~= false and snowfallEnabled then
-        task.wait(0.5)
+    task.wait(0.7)
+    if snowfallEnabled then
         Library:AddSnowfallToWindow(Config.SnowfallConfig or {
             Count = 70,
             Speed = 10
         })
     end
-    
-    return Window
 end
 
 
@@ -11280,6 +11281,10 @@ function Library:AddSnowfallToWindow(Config)
         end
         snowContainer:Destroy()
     end
+    
+    -- Применить текущую настройку видимости
+    local snowfallEnabled = InterfaceManager.Settings.Snowfall == nil and true or InterfaceManager.Settings.Snowfall
+    snowfall:SetVisible(snowfallEnabled)
     
     Library.Snowfall = snowfall
     return snowfall
