@@ -1,4 +1,4 @@
-local Lighting = game:GetService("Lighting")
+Вот мой код библиотеки тут я добавил падающие снежинки , мне нужно сделать чтобы они были круглые и разными по прозрачности . Также добавить еще такой вид снежинок ❄︎ и чтобы они были исключительно в рамках окна интерфейса не выходили за его пределы что с верху что снизу и по бакам . Вот мой код скажи как мне это все сделать -local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -9222,7 +9222,9 @@ local InterfaceManager = {} do
 		Transparency = true,
 
 
-		MenuKeybind = "M"
+		MenuKeybind = "M",
+
+		 Snowfall = true
 
 
 	}
@@ -9327,58 +9329,43 @@ local InterfaceManager = {} do
 
 
 
-	function InterfaceManager:SaveSettings()
+function InterfaceManager:SaveSettings()
 
 
-		writefile(self.Folder .. "/options.json", httpService:JSONEncode(InterfaceManager.Settings))
+    writefile(self.Folder .. "/options.json", httpService:JSONEncode(InterfaceManager.Settings))
 
 
-	end
-
-
-
-
-
-	function InterfaceManager:LoadSettings()
-
-
-		local path = self.Folder .. "/options.json"
-
-
-		if isfile(path) then
-
-
-			local data = readfile(path)
+end
 
 
 
 
 
-			if not RunService:IsStudio() then local success, decoded = pcall(httpService.JSONDecode, httpService, data) end
+function InterfaceManager:LoadSettings()
 
+    local path = self.Folder .. "/options.json"
+    if isfile(path) then
 
+        local data = readfile(path)
+        
+        if not RunService:IsStudio() then 
 
+            local success, decoded = pcall(httpService.JSONDecode, httpService, data) 
+        end
+        
+        if success then
 
+            for i, v in next, decoded do
 
-			if success then
+                InterfaceManager.Settings[i] = v
 
+            end
 
-				for i, v in next, decoded do
+        end
+	
+    end
 
-
-					InterfaceManager.Settings[i] = v
-
-
-				end
-
-
-			end
-
-
-		end
-
-
-	end
+end
 
 
 	function InterfaceManager:BuildInterfaceSection(tab)
@@ -9490,6 +9477,45 @@ local InterfaceManager = {} do
 
 
 
+    local SnowfallToggle = section:AddToggle("SnowfallToggle", {
+
+        Title = "Snowfall",
+
+        Description = "Enables or disables falling snow effect.",
+
+        Default = Settings.Snowfall == nil and true or Settings.Snowfall, 
+
+        Callback = function(Value)
+
+            Settings.Snowfall = Value
+
+            InterfaceManager:SaveSettings()
+            
+            if Library.Window and Library.Snowfall then
+
+                Library.Snowfall:SetVisible(Value)
+                
+        
+                if Value and not Library.Snowfall.instance then
+
+                    if Library.Window.SnowfallConfig then
+
+                        Library:AddSnowfallToWindow(Library.Window.SnowfallConfig)
+
+                    else
+
+                        Library:AddSnowfallToWindow({Count = 80, Speed = 60})
+
+                    end
+
+                end
+
+            end
+
+        end
+
+
+    })
 
 
 		section:AddSlider("WindowTransparency", {
@@ -9601,8 +9627,16 @@ Library.CreateWindow = function(self, Config)
 		Config.BackgroundTransparency = 0.5
 	end
 
+    if Config.Snowfall ~= false then
+        Library.WindowSnowfallEnabled = true
+        Library.WindowSnowfallConfig = Config.SnowfallConfig or {
+            Count = 70,
+            Speed = 10
+        }
 
-
+    else
+        Library.WindowSnowfallEnabled = false
+    end
 
 
 	if Config.Acrylic then
@@ -9706,11 +9740,14 @@ Library.CreateWindow = function(self, Config)
 	})
 
 
-	Library.Window = Window
+    Library.Window = Window
 
-
-	table.insert(Library.Windows, Window)
-
+    table.insert(Library.Windows, Window)
+    
+    Window.SnowfallConfig = Config.SnowfallConfig or {
+        Count = 70,
+        Speed = 10
+    }
 
 	InterfaceManager:SetTheme(Config.Theme)
 
@@ -9721,7 +9758,7 @@ Library.CreateWindow = function(self, Config)
         task.wait(0.5) 
 
 local snowfallConfig = Config.SnowfallConfig or {
-   Count = 80,     
+   Count = 69,     
    Speed = 10,      
 }
 
@@ -9730,6 +9767,17 @@ local snowfallConfig = Config.SnowfallConfig or {
     
     InterfaceManager:SetTheme(Config.Theme)
     Library:SetTheme(Config.Theme)
+    
+    InterfaceManager:LoadSettings()
+    local snowfallEnabled = InterfaceManager.Settings.Snowfall == nil and true or InterfaceManager.Settings.Snowfall
+    
+    if Config.Snowfall ~= false and snowfallEnabled then
+        task.wait(0.5)
+        Library:AddSnowfallToWindow(Config.SnowfallConfig or {
+            Count = 70,
+            Speed = 10
+        })
+    end
     
     return Window
 end
