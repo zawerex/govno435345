@@ -9478,44 +9478,32 @@ end
 
 
 local SnowfallToggle = section:AddToggle("SnowfallToggle", {
-
-        Title = "Snowfall",
-
-        Description = "Enables or disables falling snow effect.",
-
-        Default = Settings.Snowfall == nil and true or Settings.Snowfall, 
-
-Callback = function(Value)
-    Settings.Snowfall = Value
-    InterfaceManager:SaveSettings()
-    
-    -- Немедленно применить видимость к существующему снегопаду
-    if Library.Snowfall then
-        Library.Snowfall:SetVisible(Value)
-    end
-    
-    -- Если снег включается, но снегопада нет - создать
-    if Value and not Library.Snowfall then
-        if Library.Window then
-            task.wait(0.5)
-            local config = Library.Window.SnowfallConfig or {Count = 70, Speed = 10}
-            Library:AddSnowfallToWindow(config)
+    Title = "Snowfall",
+    Description = "Enables or disables falling snow effect.",
+    Default = Settings.Snowfall == nil and true or Settings.Snowfall,
+    Callback = function(Value)
+        Settings.Snowfall = Value
+        InterfaceManager:SaveSettings()
+        
+        -- Немедленно применить видимость к существующему снегопаду
+        if Library.Snowfall then
+            Library.Snowfall:SetVisible(Value)
         end
-    elseif not Value and Library.Snowfall then
-        -- Если снег выключается, уничтожить снегопад
-        Library.Snowfall:Destroy()
-        Library.Snowfall = nil
-
-		             end
-
-                 end
-
+        
+        -- Если снег включается, но снегопада нет - создать
+        if Value and not Library.Snowfall then
+            if Library.Window then
+                task.wait(0.5)
+                local config = Library.Window.SnowfallConfig or {Count = 70, Speed = 10}
+                Library:AddSnowfallToWindow(config)
             end
-
+        elseif not Value and Library.Snowfall then
+            -- Если снег выключается, уничтожить снегопад
+            Library.Snowfall:Destroy()
+            Library.Snowfall = nil
         end
-
-
-    })
+    end
+})
 
 
 		section:AddSlider("WindowTransparency", {
