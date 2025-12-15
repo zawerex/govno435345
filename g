@@ -9472,7 +9472,6 @@ end
 		end
 
 
-
 local SnowfallToggle = section:AddToggle("SnowfallToggle", {
     Title = "Snowfall",
     Description = "Enables or disables falling snow effect.",
@@ -9481,26 +9480,31 @@ local SnowfallToggle = section:AddToggle("SnowfallToggle", {
         Settings.Snowfall = Value
         InterfaceManager:SaveSettings()
         
-        -- Немедленно применить видимость к существующему снегопаду
-        if Library.Snowfall then
-            Library.Snowfall:SetVisible(Value)
-        end
-        
-        -- Если снег включается, но снегопада нет - создать
-        if Value and not Library.Snowfall then
-            if Library.Window then
-                task.wait(0.5)
-                local config = Library.Window.SnowfallConfig or {Count = 70, Speed = 10}
-                Library:AddSnowfallToWindow(config)
+        -- Если снег включается
+        if Value then
+            -- Если снегопад еще не создан, создаем его
+            if not Library.Snowfall then
+                if Library.Window and Library.Window.SnowContainer then
+                    -- Инициализируем снегопад
+                    Library:AddSnowfallToWindow(Library.Window.SnowfallConfig or {
+                        Count = 70,
+                        Speed = 10
+                    })
+                end
             end
-        elseif not Value and Library.Snowfall then
-            -- Если снег выключается, уничтожить снегопад
-            Library.Snowfall:Destroy()
-            Library.Snowfall = nil
+            
+            -- Делаем снегопад видимым
+            if Library.Snowfall then
+                Library.Snowfall:SetVisible(true)
+            end
+        else
+            -- Если снег выключается, скрываем снегопад
+            if Library.Snowfall then
+                Library.Snowfall:SetVisible(false)
+            end
         end
     end
 })
-
 
 		section:AddSlider("WindowTransparency", {
 
@@ -9728,6 +9732,7 @@ Library.CreateWindow = function(self, Config)
 
     table.insert(Library.Windows, Window)
     
+if Config.Snowfall ~= false then 
     Window.SnowfallConfig = Config.SnowfallConfig or {
         Count = 70,
         Speed = 10
@@ -9746,6 +9751,19 @@ local snowfallConfig = Config.SnowfallConfig or {
    Speed = 10,      
 }
 
+    -- Создаем контейнер для снега заранее
+    local snowContainer = Instance.new("Frame")
+    snowContainer.Name = "SnowfallContainer"
+    snowContainer.Size = UDim2.new(1, 0, 1, 0)
+    snowContainer.BackgroundTransparency = 1
+    snowContainer.ZIndex = 1
+    snowContainer.ClipsDescendants = true
+    snowContainer.Parent = Window.Root
+    snowContainer.Visible = false
+    
+    Window.SnowContainer = snowContainer
+end
+
         Library:AddSnowfallToWindow(snowfallConfig)
     end
     
@@ -9754,19 +9772,34 @@ local snowfallConfig = Config.SnowfallConfig or {
     
 InterfaceManager:LoadSettings()
 
--- Если снег не отключен в Config окна, инициализировать
+-- После создания окна
 if Config.Snowfall ~= false then
     local snowfallEnabled = InterfaceManager.Settings.Snowfall == nil and true or InterfaceManager.Settings.Snowfall
     
     task.wait(0.7)
     if snowfallEnabled then
+        -- Создаем снегопад сразу
         Library:AddSnowfallToWindow(Config.SnowfallConfig or {
             Count = 70,
             Speed = 10
         })
+        
+        -- Применяем видимость
+        if Library.Snowfall then
+            Library.Snowfall:SetVisible(true)
+        end
+    else
+        -- Создаем снегопад, но делаем невидимым
+        Library:AddSnowfallToWindow(Config.SnowfallConfig or {
+            Count = 70,
+            Speed = 10
+        })
+        
+        if Library.Snowfall then
+            Library.Snowfall:SetVisible(false)
+        end
     end
 end
-
 
 function Library:CreateMinimizer(Config)
 
@@ -9781,8 +9814,6 @@ function Library:CreateMinimizer(Config)
 
 
 	end
-
-
 
 
 
@@ -11095,6 +11126,21 @@ end)
 
 function Library:AddSnowfallToWindow(Config)
     if not Library.Window then return end
+    
+    -- Если контейнер уже существует, используем его
+    local snowContainer = Library.Window.SnowContainer
+    
+    -- Если контейнера нет, создаем его
+    if not snowContainer then
+        snowContainer = Instance.new("Frame")
+        snowContainer.Name = "SnowfallContainer"
+        snowContainer.Size = UDim2.new(1, 0, 1, 0)
+        snowContainer.BackgroundTransparency = 1
+        snowContainer.ZIndex = 1
+        snowContainer.ClipsDescendants = true
+        snowContainer.Parent = Library.Window.Root
+        Library.Window.SnowContainer = snowContainer
+    end
     
     local snowfall = {}
     Config = Config or {}
