@@ -1,4 +1,4 @@
-Вот мой код библиотеки тут я добавил падающие снежинки , мне нужно сделать чтобы они были круглые и разными по прозрачности . Также добавить еще такой вид снежинок ❄︎ и чтобы они были исключительно в рамках окна интерфейса не выходили за его пределы что с верху что снизу и по бакам . Вот мой код скажи как мне это все сделать -local Lighting = game:GetService("Lighting")
+local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local UserInputService = game:GetService("UserInputService")
