@@ -9569,7 +9569,201 @@ local SnowfallToggle = section:AddToggle("SnowfallToggle", {
 end
 
 
-
+function Library:AddSnowfallToWindow(Config)
+    if not Library.Window then return end
+    
+    -- Если контейнер уже существует, используем его
+    local snowContainer = Library.Window.SnowContainer
+    
+    -- Если контейнера нет, создаем его
+    if not snowContainer then
+        snowContainer = Instance.new("Frame")
+        snowContainer.Name = "SnowfallContainer"
+        snowContainer.Size = UDim2.new(1, 0, 1, 0)
+        snowContainer.BackgroundTransparency = 1
+        snowContainer.ZIndex = 1
+        snowContainer.ClipsDescendants = true
+        snowContainer.Parent = Library.Window.Root
+        Library.Window.SnowContainer = snowContainer
+    end
+    
+    local snowfall = {}
+    Config = Config or {}
+    
+    local SnowModule = {}
+    
+    function SnowModule:Init(Parent, Config)
+        local snowContainer = Instance.new("Frame")
+        snowContainer.Name = "SnowfallEffect"
+        snowContainer.Size = UDim2.new(1, 0, 1, 0)
+        snowContainer.BackgroundTransparency = 1
+        snowContainer.ClipsDescendants = true
+        snowContainer.Parent = Parent
+        
+        local snowflakeCount = Config.Count or 50
+        local fallSpeed = Config.Speed or 60
+        
+        -- Яркий белый цвет для всех снежинок
+        local snowflakeColor = Color3.fromRGB(255, 255, 255)
+        
+        local snowflakes = {}
+        local connections = {}
+        
+        -- Создание круглых снежинок
+        for i = 1, snowflakeCount do
+            local snowflake = Instance.new("Frame")
+            snowflake.Name = "SnowflakeCircle"..i
+            snowflake.BackgroundColor3 = snowflakeColor -- Яркий белый
+            snowflake.BorderSizePixel = 0
+            
+            -- Разные размеры снежинок
+            local size = math.random(2, 6)
+            snowflake.Size = UDim2.new(0, size, 0, size)
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(1, 0) -- Полностью круглые
+            corner.Parent = snowflake
+            
+            -- Нет прозрачности - всегда яркие
+            snowflake.BackgroundTransparency = 0
+            
+            snowflake.Position = UDim2.new(
+                math.random() * 0.95, 
+                0, 
+                math.random() * -0.5, 
+                0
+            )
+            snowflake.Parent = snowContainer
+            
+            local speed = math.random(fallSpeed * 0.5, fallSpeed * 1.5)
+            
+            snowflakes[i] = {
+                frame = snowflake,
+                speed = speed,
+                size = size
+            }
+        end
+        
+        -- Границы контейнера
+        local containerBounds = {
+            left = 0,
+            right = 1,
+            top = 0,
+            bottom = 1
+        }
+        
+        local lastUpdate = tick()
+        local connection = game:GetService("RunService").Heartbeat:Connect(function()
+            local currentTime = tick()
+            local deltaTime = currentTime - lastUpdate
+            lastUpdate = currentTime
+            
+            for _, snowflake in ipairs(snowflakes) do
+                local frame = snowflake.frame
+                local currentPos = frame.Position
+                
+                -- Прямое вертикальное падение
+                local newY = currentPos.Y.Scale + (snowflake.speed * deltaTime / 100)
+                local newX = currentPos.X.Scale
+                
+                -- Проверка горизонтальных границ
+                if newX < containerBounds.left then
+                    newX = containerBounds.right
+                elseif newX > containerBounds.right then
+                    newX = containerBounds.left
+                end
+                
+                -- Если снежинка ушла за нижнюю границу
+                if newY > containerBounds.bottom then
+                    newY = containerBounds.top - 0.1
+                    newX = math.random() * 0.95
+                    
+                    -- Меняем размер при перерождении
+                    local newSize = math.random(2, 6)
+                    frame.Size = UDim2.new(0, newSize, 0, newSize)
+                    snowflake.size = newSize
+                end
+                
+                frame.Position = UDim2.new(
+                    newX,
+                    0,
+                    newY,
+                    0
+                )
+            end
+        end)
+        
+        table.insert(connections, connection)
+        
+        local SnowInstance = {}
+        
+        function SnowInstance:SetIntensity(intensity)
+            -- Этот метод теперь не нужен, так как нет прозрачности
+            -- Оставляем для совместимости
+            intensity = math.clamp(intensity, 0, 1)
+            -- Ничего не делаем, снежинки всегда яркие
+        end
+        
+        function SnowInstance:SetSpeed(speed)
+            for _, snowflake in ipairs(snowflakes) do
+                snowflake.speed = speed * math.random(0.5, 1.5)
+            end
+        end
+        
+        function SnowInstance:Destroy()
+            for _, conn in ipairs(connections) do
+                conn:Disconnect()
+            end
+            snowContainer:Destroy()
+        end
+        
+        return SnowInstance
+    end
+    
+    -- Создаем контейнер для снега
+    local snowContainer = Instance.new("Frame")
+    snowContainer.Name = "SnowfallContainer"
+    snowContainer.Size = UDim2.new(1, 0, 1, 0)
+    snowContainer.BackgroundTransparency = 1
+    snowContainer.ZIndex = 1
+    snowContainer.ClipsDescendants = true
+    snowContainer.Parent = Library.Window.Root
+    
+    -- Инициализируем снегопад
+    snowfall.instance = SnowModule:Init(snowContainer, {
+        Count = Config.Count or 80,
+        Speed = Config.Speed or 60
+    })
+    
+    -- Функции управления
+    function snowfall:SetVisible(visible)
+        snowContainer.Visible = visible
+    end
+    
+    function snowfall:SetIntensity(intensity)
+        -- Ничего не делаем, снежинки всегда яркие
+    end
+    
+    function snowfall:SetSpeed(speed)
+        if snowfall.instance and snowfall.instance.SetSpeed then
+            snowfall.instance:SetSpeed(speed)
+        end
+    end
+    
+    function snowfall:Destroy()
+        if snowfall.instance and snowfall.instance.Destroy then
+            snowfall.instance:Destroy()
+        end
+        snowContainer:Destroy()
+    end
+    
+    -- Применить текущую настройку видимости
+    local snowfallEnabled = InterfaceManager.Settings.Snowfall == nil and true or InterfaceManager.Settings.Snowfall
+    snowfall:SetVisible(snowfallEnabled)
+    
+    Library.Snowfall = snowfall
+    return snowfall
+end
 
 
 Library.CreateWindow = function(self, Config)
@@ -9744,29 +9938,15 @@ if Config.Snowfall ~= false then
 	Library:SetTheme(Config.Theme)
 
     if Config.Snowfall ~= false then 
-        task.wait(0.5) 
-
-local snowfallConfig = Config.SnowfallConfig or {
-   Count = 70,     
-   Speed = 10,      
-}
-
-    -- Создаем контейнер для снега заранее
-    local snowContainer = Instance.new("Frame")
-    snowContainer.Name = "SnowfallContainer"
-    snowContainer.Size = UDim2.new(1, 0, 1, 0)
-    snowContainer.BackgroundTransparency = 1
-    snowContainer.ZIndex = 1
-    snowContainer.ClipsDescendants = true
-    snowContainer.Parent = Window.Root
-    snowContainer.Visible = false
-    
-    Window.SnowContainer = snowContainer
-end
-
+        task.wait(0.5)
+        local snowfallConfig = Config.SnowfallConfig or {
+            Count = 70,
+            Speed = 10
+        }
         Library:AddSnowfallToWindow(snowfallConfig)
     end
-    
+end
+
     InterfaceManager:SetTheme(Config.Theme)
     Library:SetTheme(Config.Theme)
     
@@ -11123,203 +11303,6 @@ AddSignal(MobileMinimizeButton.MouseButton1Click, function()
 
     end
 end)
-
-function Library:AddSnowfallToWindow(Config)
-    if not Library.Window then return end
-    
-    -- Если контейнер уже существует, используем его
-    local snowContainer = Library.Window.SnowContainer
-    
-    -- Если контейнера нет, создаем его
-    if not snowContainer then
-        snowContainer = Instance.new("Frame")
-        snowContainer.Name = "SnowfallContainer"
-        snowContainer.Size = UDim2.new(1, 0, 1, 0)
-        snowContainer.BackgroundTransparency = 1
-        snowContainer.ZIndex = 1
-        snowContainer.ClipsDescendants = true
-        snowContainer.Parent = Library.Window.Root
-        Library.Window.SnowContainer = snowContainer
-    end
-    
-    local snowfall = {}
-    Config = Config or {}
-    
-    local SnowModule = {}
-    
-    function SnowModule:Init(Parent, Config)
-        local snowContainer = Instance.new("Frame")
-        snowContainer.Name = "SnowfallEffect"
-        snowContainer.Size = UDim2.new(1, 0, 1, 0)
-        snowContainer.BackgroundTransparency = 1
-        snowContainer.ClipsDescendants = true
-        snowContainer.Parent = Parent
-        
-        local snowflakeCount = Config.Count or 50
-        local fallSpeed = Config.Speed or 60
-        
-        -- Яркий белый цвет для всех снежинок
-        local snowflakeColor = Color3.fromRGB(255, 255, 255)
-        
-        local snowflakes = {}
-        local connections = {}
-        
-        -- Создание круглых снежинок
-        for i = 1, snowflakeCount do
-            local snowflake = Instance.new("Frame")
-            snowflake.Name = "SnowflakeCircle"..i
-            snowflake.BackgroundColor3 = snowflakeColor -- Яркий белый
-            snowflake.BorderSizePixel = 0
-            
-            -- Разные размеры снежинок
-            local size = math.random(2, 6)
-            snowflake.Size = UDim2.new(0, size, 0, size)
-            
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(1, 0) -- Полностью круглые
-            corner.Parent = snowflake
-            
-            -- Нет прозрачности - всегда яркие
-            snowflake.BackgroundTransparency = 0
-            
-            snowflake.Position = UDim2.new(
-                math.random() * 0.95, 
-                0, 
-                math.random() * -0.5, 
-                0
-            )
-            snowflake.Parent = snowContainer
-            
-            local speed = math.random(fallSpeed * 0.5, fallSpeed * 1.5)
-            
-            snowflakes[i] = {
-                frame = snowflake,
-                speed = speed,
-                size = size
-            }
-        end
-        
-        -- Границы контейнера
-        local containerBounds = {
-            left = 0,
-            right = 1,
-            top = 0,
-            bottom = 1
-        }
-        
-        local lastUpdate = tick()
-        local connection = game:GetService("RunService").Heartbeat:Connect(function()
-            local currentTime = tick()
-            local deltaTime = currentTime - lastUpdate
-            lastUpdate = currentTime
-            
-            for _, snowflake in ipairs(snowflakes) do
-                local frame = snowflake.frame
-                local currentPos = frame.Position
-                
-                -- Прямое вертикальное падение
-                local newY = currentPos.Y.Scale + (snowflake.speed * deltaTime / 100)
-                local newX = currentPos.X.Scale
-                
-                -- Проверка горизонтальных границ
-                if newX < containerBounds.left then
-                    newX = containerBounds.right
-                elseif newX > containerBounds.right then
-                    newX = containerBounds.left
-                end
-                
-                -- Если снежинка ушла за нижнюю границу
-                if newY > containerBounds.bottom then
-                    newY = containerBounds.top - 0.1
-                    newX = math.random() * 0.95
-                    
-                    -- Меняем размер при перерождении
-                    local newSize = math.random(2, 6)
-                    frame.Size = UDim2.new(0, newSize, 0, newSize)
-                    snowflake.size = newSize
-                end
-                
-                frame.Position = UDim2.new(
-                    newX,
-                    0,
-                    newY,
-                    0
-                )
-            end
-        end)
-        
-        table.insert(connections, connection)
-        
-        local SnowInstance = {}
-        
-        function SnowInstance:SetIntensity(intensity)
-            -- Этот метод теперь не нужен, так как нет прозрачности
-            -- Оставляем для совместимости
-            intensity = math.clamp(intensity, 0, 1)
-            -- Ничего не делаем, снежинки всегда яркие
-        end
-        
-        function SnowInstance:SetSpeed(speed)
-            for _, snowflake in ipairs(snowflakes) do
-                snowflake.speed = speed * math.random(0.5, 1.5)
-            end
-        end
-        
-        function SnowInstance:Destroy()
-            for _, conn in ipairs(connections) do
-                conn:Disconnect()
-            end
-            snowContainer:Destroy()
-        end
-        
-        return SnowInstance
-    end
-    
-    -- Создаем контейнер для снега
-    local snowContainer = Instance.new("Frame")
-    snowContainer.Name = "SnowfallContainer"
-    snowContainer.Size = UDim2.new(1, 0, 1, 0)
-    snowContainer.BackgroundTransparency = 1
-    snowContainer.ZIndex = 1
-    snowContainer.ClipsDescendants = true
-    snowContainer.Parent = Library.Window.Root
-    
-    -- Инициализируем снегопад
-    snowfall.instance = SnowModule:Init(snowContainer, {
-        Count = Config.Count or 80,
-        Speed = Config.Speed or 60
-    })
-    
-    -- Функции управления
-    function snowfall:SetVisible(visible)
-        snowContainer.Visible = visible
-    end
-    
-    function snowfall:SetIntensity(intensity)
-        -- Ничего не делаем, снежинки всегда яркие
-    end
-    
-    function snowfall:SetSpeed(speed)
-        if snowfall.instance and snowfall.instance.SetSpeed then
-            snowfall.instance:SetSpeed(speed)
-        end
-    end
-    
-    function snowfall:Destroy()
-        if snowfall.instance and snowfall.instance.Destroy then
-            snowfall.instance:Destroy()
-        end
-        snowContainer:Destroy()
-    end
-    
-    -- Применить текущую настройку видимости
-    local snowfallEnabled = InterfaceManager.Settings.Snowfall == nil and true or InterfaceManager.Settings.Snowfall
-    snowfall:SetVisible(snowfallEnabled)
-    
-    Library.Snowfall = snowfall
-    return snowfall
-end
--- ==================== КОНЕЦ СНЕГОПАДА ====================
 
 if RunService:IsStudio() then task.wait(0.01) end
 return Library, SaveManager, InterfaceManager, Mobile
