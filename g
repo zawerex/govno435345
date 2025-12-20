@@ -9224,8 +9224,6 @@ local InterfaceManager = {} do
 
 		MenuKeybind = "M",
 
-		 Snowfall = true
-
 
 	}
 
@@ -9429,7 +9427,6 @@ end
 
 
 
-
 		if Library.UseAcrylic and not Mobile then
 
 
@@ -9471,41 +9468,6 @@ end
 
 		end
 
-
-local SnowfallToggle = section:AddToggle("SnowfallToggle", {
-    Title = "Snowfall",
-    Description = "Enables or disables falling snow effect.",
-    Default = Settings.Snowfall == nil and true or Settings.Snowfall,
-    Callback = function(Value)
-        Settings.Snowfall = Value
-        InterfaceManager:SaveSettings()
-        
-        -- Если снег включается
-        if Value then
-            -- Если снегопад еще не создан, создаем его
-            if not Library.Snowfall then
-                if Library.Window and Library.Window.SnowContainer then
-                    -- Инициализируем снегопад
-                    Library:AddSnowfallToWindow(Library.Window.SnowfallConfig or {
-                        Count = 70,
-                        Speed = 10
-                    })
-                end
-            end
-            
-            -- Делаем снегопад видимым
-            if Library.Snowfall then
-                Library.Snowfall:SetVisible(true)
-            end
-        else
-            -- Если снег выключается, скрываем снегопад
-            if Library.Snowfall then
-                Library.Snowfall:SetVisible(false)
-            end
-        end
-    end
-})
-
 		section:AddSlider("WindowTransparency", {
 
 
@@ -9537,8 +9499,6 @@ local SnowfallToggle = section:AddToggle("SnowfallToggle", {
 
 
 		})
-
-
 
 
 
@@ -9757,9 +9717,7 @@ function Library:AddSnowfallToWindow(Config)
         snowContainer:Destroy()
     end
     
-    -- Применить текущую настройку видимости
-    local snowfallEnabled = InterfaceManager.Settings.Snowfall == nil and true or InterfaceManager.Settings.Snowfall
-    snowfall:SetVisible(snowfallEnabled)
+snowfall:SetVisible(true)
     
     Library.Snowfall = snowfall
     return snowfall
@@ -9922,63 +9880,26 @@ Library.CreateWindow = function(self, Config)
 	})
 
 
-    Library.Window = Window
+Library.Window = Window
+table.insert(Library.Windows, Window)
 
-    table.insert(Library.Windows, Window)
-    
-if Config.Snowfall ~= false then 
-    Window.SnowfallConfig = Config.SnowfallConfig or {
-        Count = 70,
-        Speed = 10
-    }
+Window.SnowfallConfig = Config.SnowfallConfig or {
+    Count = 70,
+    Speed = 10
+}
 
-	InterfaceManager:SetTheme(Config.Theme)
-
-
-	Library:SetTheme(Config.Theme)
-
-    if Config.Snowfall ~= false then 
-        task.wait(0.5)
-        local snowfallConfig = Config.SnowfallConfig or {
-            Count = 70,
-            Speed = 10
-        }
-        Library:AddSnowfallToWindow(snowfallConfig)
-    end
-end
-
-    InterfaceManager:SetTheme(Config.Theme)
-    Library:SetTheme(Config.Theme)
+InterfaceManager:SetTheme(Config.Theme)
+Library:SetTheme(Config.Theme)
     
 InterfaceManager:LoadSettings()
 
--- После создания окна
+-- Создаем снегопад автоматически (без тоггла)
 if Config.Snowfall ~= false then
-    local snowfallEnabled = InterfaceManager.Settings.Snowfall == nil and true or InterfaceManager.Settings.Snowfall
-    
-    task.wait(0.7)
-    if snowfallEnabled then
-        -- Создаем снегопад сразу
-        Library:AddSnowfallToWindow(Config.SnowfallConfig or {
-            Count = 70,
-            Speed = 10
-        })
-        
-        -- Применяем видимость
-        if Library.Snowfall then
-            Library.Snowfall:SetVisible(true)
-        end
-    else
-        -- Создаем снегопад, но делаем невидимым
-        Library:AddSnowfallToWindow(Config.SnowfallConfig or {
-            Count = 70,
-            Speed = 10
-        })
-        
-        if Library.Snowfall then
-            Library.Snowfall:SetVisible(false)
-        end
-    end
+    task.wait(0.5) -- Небольшая задержка для инициализации окна
+    Library:AddSnowfallToWindow(Config.SnowfallConfig or {
+        Count = 70,
+        Speed = 10
+    })
 end
 
 function Library:CreateMinimizer(Config)
