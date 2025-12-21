@@ -11102,7 +11102,7 @@ function Library:AddSnowfallToWindow()
         
         -- ФИКСИРОВАННЫЕ ЗНАЧЕНИЯ
         local snowflakeCount = 60 -- Всегда 30 снежинок
-        local fallSpeed = 15        -- Всегда скорость 5
+        local fallSpeed = 5       -- Всегда скорость 5
         
         local snowflakeColor = Color3.fromRGB(255, 255, 255)
         
