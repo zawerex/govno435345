@@ -11063,7 +11063,11 @@ AddSignal(MobileMinimizeButton.MouseButton1Click, function()
 
 end)
 
- -- Конфигурация снежинок (без настроек в интерфейсе)
+-- ==============================================
+-- СНЕЖИНКИ (АВТОМАТИЧЕСКИЕ)
+-- ==============================================
+
+-- Конфигурация снежинок
 local SnowflakesConfig = {
     Enabled = true,
     Count = 30,
@@ -11074,7 +11078,7 @@ local Snowflakes = {}
 local SnowflakesContainer = nil
 local SnowflakesRunning = false
 
--- Функция для создания снежинок
+-- Функция для создания снежинок (вызывается автоматически)
 function Library:CreateSnowflakes()
     if not SnowflakesConfig.Enabled then return end
     
@@ -11162,7 +11166,32 @@ function Library:RemoveSnowflakes()
     end
     
     Snowflakes = {}
-end   
+end
+
+-- Автоматически создаем снежинки при создании окна
+local oldCreateWindow = Library.CreateWindow
+Library.CreateWindow = function(self, config)
+    local window = oldCreateWindow(self, config)
+    
+    -- Создаем снежинки через 0.5 секунды после создания окна
+    task.spawn(function()
+        task.wait(0.5)
+        self:CreateSnowflakes()
+    end)
+    
+    return window
+end
+
+-- Автоматически удаляем снежинки при уничтожении библиотеки
+local oldDestroy = Library.Destroy
+Library.Destroy = function(self)
+    self:RemoveSnowflakes()
+    return oldDestroy(self)
+end
+
+-- ==============================================
+-- КОНЕЦ СНЕЖИНКИ
+-- ==============================================
 
 if RunService:IsStudio() then task.wait(0.01) end
 return Library, SaveManager, InterfaceManager, Mobile
