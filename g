@@ -11065,21 +11065,18 @@ function Library:AddSnowfallToWindow(Config)
         
         local snowflakeCount = Config.Count or 50
         local fallSpeed = Config.Speed or 60
-        
-        -- Яркий белый цвет для всех снежинок
+
         local snowflakeColor = Color3.fromRGB(255, 255, 255)
         
         local snowflakes = {}
         local connections = {}
-        
-        -- Создание круглых снежинок
+
         for i = 1, snowflakeCount do
             local snowflake = Instance.new("Frame")
             snowflake.Name = "SnowflakeCircle"..i
             snowflake.BackgroundColor3 = snowflakeColor -- Яркий белый
             snowflake.BorderSizePixel = 0
             
-            -- Разные размеры снежинок
             local size = math.random(2, 6)
             snowflake.Size = UDim2.new(0, size, 0, size)
             
@@ -11087,7 +11084,6 @@ function Library:AddSnowfallToWindow(Config)
             corner.CornerRadius = UDim.new(1, 0) -- Полностью круглые
             corner.Parent = snowflake
             
-            -- Нет прозрачности - всегда яркие
             snowflake.BackgroundTransparency = 0
             
             snowflake.Position = UDim2.new(
@@ -11107,7 +11103,6 @@ function Library:AddSnowfallToWindow(Config)
             }
         end
         
-        -- Границы контейнера
         local containerBounds = {
             left = 0,
             right = 1,
@@ -11124,24 +11119,20 @@ function Library:AddSnowfallToWindow(Config)
             for _, snowflake in ipairs(snowflakes) do
                 local frame = snowflake.frame
                 local currentPos = frame.Position
-                
-                -- Прямое вертикальное падение
+
                 local newY = currentPos.Y.Scale + (snowflake.speed * deltaTime / 100)
                 local newX = currentPos.X.Scale
                 
-                -- Проверка горизонтальных границ
                 if newX < containerBounds.left then
                     newX = containerBounds.right
                 elseif newX > containerBounds.right then
                     newX = containerBounds.left
                 end
                 
-                -- Если снежинка ушла за нижнюю границу
                 if newY > containerBounds.bottom then
                     newY = containerBounds.top - 0.1
                     newX = math.random() * 0.95
                     
-                    -- Меняем размер при перерождении
                     local newSize = math.random(2, 6)
                     frame.Size = UDim2.new(0, newSize, 0, newSize)
                     snowflake.size = newSize
@@ -11161,10 +11152,9 @@ function Library:AddSnowfallToWindow(Config)
         local SnowInstance = {}
         
         function SnowInstance:SetIntensity(intensity)
-            -- Этот метод теперь не нужен, так как нет прозрачности
-            -- Оставляем для совместимости
+
             intensity = math.clamp(intensity, 0, 1)
-            -- Ничего не делаем, снежинки всегда яркие
+
         end
         
         function SnowInstance:SetSpeed(speed)
@@ -11183,7 +11173,6 @@ function Library:AddSnowfallToWindow(Config)
         return SnowInstance
     end
     
-    -- Создаем контейнер для снега
     local snowContainer = Instance.new("Frame")
     snowContainer.Name = "SnowfallContainer"
     snowContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -11192,19 +11181,17 @@ function Library:AddSnowfallToWindow(Config)
     snowContainer.ClipsDescendants = true
     snowContainer.Parent = Library.Window.Root
     
-    -- Инициализируем снегопад
     snowfall.instance = SnowModule:Init(snowContainer, {
         Count = Config.Count or 38,
         Speed = Config.Speed or 9.5
     })
-    
-    -- Функции управления
+
     function snowfall:SetVisible(visible)
         snowContainer.Visible = visible
     end
     
      function snowfall:SetIntensity(intensity)
-        -- Изменение прозрачности снежинок
+
         intensity = math.clamp(intensity, 0, 1)
         local targetTransparency = 1 - intensity
         
@@ -11231,7 +11218,6 @@ function Library:AddSnowfallToWindow(Config)
     Library.Snowfall = snowfall
     return snowfall
 end
--- ==================== КОНЕЦ СНЕГОПАДА ====================
-
+-- конец снега 
 if RunService:IsStudio() then task.wait(0.01) end
 return Library, SaveManager, InterfaceManager, Mobile
