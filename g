@@ -11122,8 +11122,8 @@ function Library:AddSnowfallToWindow(Config)
         snowContainer.ClipsDescendants = true
         snowContainer.Parent = Parent
         
-        local snowflakeCount = Config.Count or 50
-        local fallSpeed = Config.Speed or 60
+        local snowflakeCount = Config.Count or 40
+        local fallSpeed = Config.Speed or 10
         
         -- Яркий белый цвет для всех снежинок
         local snowflakeColor = Color3.fromRGB(255, 255, 255)
@@ -11253,8 +11253,8 @@ function Library:AddSnowfallToWindow(Config)
     
     -- Инициализируем снегопад
     snowfall.instance = SnowModule:Init(snowContainer, {
-        Count = Config.Count or 80,
-        Speed = Config.Speed or 60
+        Count = Config.Count or 40,
+        Speed = Config.Speed or 10
     })
     
     -- Функции управления
