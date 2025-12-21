@@ -9223,6 +9223,8 @@ local InterfaceManager = {} do
 
 		MenuKeybind = "M",
 
+		 Snowfall = true
+
 
 	}
 
@@ -9335,20 +9337,33 @@ function InterfaceManager:SaveSettings()
 end
 
 
+
+
+
 function InterfaceManager:LoadSettings()
+
     local path = self.Folder .. "/options.json"
     if isfile(path) then
+
         local data = readfile(path)
         
         if not RunService:IsStudio() then 
-            local success, decoded = pcall(httpService.JSONDecode, httpService, data)
-            if success then
-                for i, v in next, decoded do
-                    InterfaceManager.Settings[i] = v
-                end
-            end
+
+            local success, decoded = pcall(httpService.JSONDecode, httpService, data) 
         end
+        
+        if success then
+
+            for i, v in next, decoded do
+
+                InterfaceManager.Settings[i] = v
+
+            end
+
+        end
+	
     end
+
 end
 
 
@@ -9458,6 +9473,48 @@ end
 
 
 		end
+
+
+
+    local SnowfallToggle = section:AddToggle("SnowfallToggle", {
+
+        Title = "Snowfall",
+
+        Description = "Enables or disables falling snow effect.",
+
+        Default = Settings.Snowfall == nil and true or Settings.Snowfall, 
+
+        Callback = function(Value)
+
+            Settings.Snowfall = Value
+
+            InterfaceManager:SaveSettings()
+            
+            if Library.Window and Library.Snowfall then
+
+                Library.Snowfall:SetVisible(Value)
+                
+        
+                if Value and not Library.Snowfall.instance then
+
+                    if Library.Window.SnowfallConfig then
+
+                        Library:AddSnowfallToWindow(Library.Window.SnowfallConfig)
+
+                    else
+
+                        Library:AddSnowfallToWindow({Count = 70, Speed = 10})
+
+                    end
+
+                end
+
+            end
+
+        end
+
+
+    })
 
 
 		section:AddSlider("WindowTransparency", {
@@ -9692,6 +9749,8 @@ Library.CreateWindow = function(self, Config)
     }
 
 	InterfaceManager:SetTheme(Config.Theme)
+
+
 	Library:SetTheme(Config.Theme)
 
     if Config.Snowfall ~= false then 
@@ -11203,16 +11262,8 @@ function Library:AddSnowfallToWindow(Config)
         snowContainer.Visible = visible
     end
     
-     function snowfall:SetIntensity(intensity)
-        -- Изменение прозрачности снежинок
-        intensity = math.clamp(intensity, 0, 1)
-        local targetTransparency = 1 - intensity
-        
-        for i, child in ipairs(snowContainer:GetChildren()) do
-            if child:IsA("Frame") then
-                child.BackgroundTransparency = targetTransparency
-            end
-        end
+    function snowfall:SetIntensity(intensity)
+        -- Ничего не делаем, снежинки всегда яркие
     end
     
     function snowfall:SetSpeed(speed)
@@ -11234,4 +11285,4 @@ end
 -- ==================== КОНЕЦ СНЕГОПАДА ====================
 
 if RunService:IsStudio() then task.wait(0.01) end
-return Library, SaveManager, InterfaceManager, Mobile
+return Library, SaveManager, InterfaceManager, Mobile. 
