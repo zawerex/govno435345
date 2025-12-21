@@ -1663,16 +1663,6 @@ end
 local TextElements = {}
 local TextElementConnections = {}
 
-local SnowflakesConfig = {
-    Enabled = true,
-    Count = 30,      -- Количество снежинок
-    Speed = 50,      -- Скорость падения (0-100)
-}
-
-local Snowflakes = {}
-local SnowflakesContainer = nil
-local SnowflakesRunning = false
-
 local function setupMiniMessageSupport(object, properties)
 	if not (object:IsA("TextLabel") or object:IsA("TextButton") or object:IsA("TextBox")) then
 		return
@@ -9732,13 +9722,10 @@ Library.CreateWindow = function(self, Config)
 	Library:SetTheme(Config.Theme)
 
 
-    InterfaceManager:SetTheme(Config.Theme)
-    Library:SetTheme(Config.Theme)
-    
-    -- Создаем снежинки
-    Library:CreateSnowflakes()  -- <-- Добавьте эту строку
-    
-    return Window
+
+
+
+	return Window
 
 
 end
@@ -10290,7 +10277,6 @@ end
 
 function Library:Destroy()
 
-    Library:RemoveSnowflakes()
 
 	if Library.Window then
 
@@ -10508,132 +10494,7 @@ else
 end
 
 
--- Функция для создания снежинок
-function Library:CreateSnowflakes()
-    if not SnowflakesConfig.Enabled then return end
-    
-    -- Удаляем старые снежинки если есть
-    Library:RemoveSnowflakes()
-    
-    -- Создаем контейнер
-    SnowflakesContainer = Creator.New("Frame", {
-        Name = "SnowflakesContainer",
-        Size = UDim2.fromScale(1, 1),
-        BackgroundTransparency = 1,
-        ClipsDescendants = false,
-        Parent = GUI,
-        ZIndex = 999999,
-    })
-    
-    -- Создаем снежинки
-    for i = 1, SnowflakesConfig.Count do
-        local size = math.random(5, 15) -- Рандомный размер от 5 до 15
-        local startX = math.random(0, 100) / 100
-        
-        local snowflake = Creator.New("Frame", {
-            Name = "Snowflake_" .. i,
-            Size = UDim2.fromOffset(size, size),
-            Position = UDim2.new(startX, 0, math.random(-100, -10) / 100, 0),
-            BackgroundTransparency = 0.2, -- Фиксированная прозрачность
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255), -- Белый цвет
-            BorderSizePixel = 0,
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            Parent = SnowflakesContainer,
-            ZIndex = 999999,
-        }, {
-            Creator.New("UICorner", {
-                CornerRadius = UDim.new(1, 0), -- Круглая форма
-            }),
-        })
-        
-        table.insert(Snowflakes, {
-            Frame = snowflake,
-            Speed = math.random(80, 120) / 100 * (SnowflakesConfig.Speed / 50), -- Нормализуем скорость
-            Size = size,
-            OriginalX = startX,
-        })
-    end
-    
-    -- Запускаем анимацию если не запущена
-    if not SnowflakesRunning then
-        SnowflakesRunning = true
-        task.spawn(function()
-            local lastTime = tick()
-            
-            while SnowflakesRunning and #Snowflakes > 0 and SnowflakesContainer and SnowflakesContainer.Parent do
-                local currentTime = tick()
-                local deltaTime = currentTime - lastTime
-                lastTime = currentTime
-                
-                for i, snowflake in ipairs(Snowflakes) do
-                    if snowflake.Frame and snowflake.Frame.Parent then
-                        -- Обновляем позицию
-                        local currentPos = snowflake.Frame.Position
-                        local newY = currentPos.Y.Scale + (snowflake.Speed * deltaTime * 0.5)
-                        
-                        -- Если снежинка упала ниже экрана, возвращаем наверх
-                        if newY > 1.1 then
-                            newY = math.random(-100, -10) / 100
-                            snowflake.OriginalX = math.random(0, 100) / 100
-                            snowflake.Speed = math.random(80, 120) / 100 * (SnowflakesConfig.Speed / 50)
-                        end
-                        
-                        -- Обновляем позицию
-                        snowflake.Frame.Position = UDim2.new(snowflake.OriginalX, 0, newY, 0)
-                    end
-                end
-                
-                task.wait(1/60) -- 60 FPS
-            end
-        end)
-    end
-end
 
--- Функция для удаления снежинок
-function Library:RemoveSnowflakes()
-    SnowflakesRunning = false
-    
-    if SnowflakesContainer then
-        SnowflakesContainer:Destroy()
-        SnowflakesContainer = nil
-    end
-    
-    Snowflakes = {}
-end
-
--- Функция для обновления конфигурации снежинок
-function Library:UpdateSnowflakesConfig(config)
-    if config.Enabled ~= nil then
-        SnowflakesConfig.Enabled = config.Enabled
-        if config.Enabled then
-            Library:CreateSnowflakes()
-        else
-            Library:RemoveSnowflakes()
-        end
-    end
-    
-    if config.Count ~= nil and config.Count ~= SnowflakesConfig.Count then
-        SnowflakesConfig.Count = config.Count
-        if SnowflakesConfig.Enabled then
-            Library:CreateSnowflakes()
-        end
-    end
-    
-    if config.Speed ~= nil then
-        SnowflakesConfig.Speed = config.Speed
-        -- Обновляем скорость всех текущих снежинок
-        for _, snowflake in ipairs(Snowflakes) do
-            if snowflake then
-                snowflake.Speed = math.random(80, 120) / 100 * (SnowflakesConfig.Speed / 50)
-            end
-        end
-    end
-end
-
--- Функция для получения текущей конфигурации снежинок
-function Library:GetSnowflakesConfig()
-    return table.clone(SnowflakesConfig)
-end
 
 
 local MinimizeButton = New("TextButton", {
@@ -11202,51 +11063,106 @@ AddSignal(MobileMinimizeButton.MouseButton1Click, function()
 
 end)
 
-    -- Функция для настройки снежинок через UI
-function Library:AddSnowflakesSettings(tab)
-    local section = tab:AddSection("Snowflakes", "lucide-snowflake")
+ -- Конфигурация снежинок (без настроек в интерфейсе)
+local SnowflakesConfig = {
+    Enabled = true,
+    Count = 30,
+    Speed = 50,
+}
+
+local Snowflakes = {}
+local SnowflakesContainer = nil
+local SnowflakesRunning = false
+
+-- Функция для создания снежинок
+function Library:CreateSnowflakes()
+    if not SnowflakesConfig.Enabled then return end
     
-    -- Включение/выключение снежинок
-    local snowToggle = section:AddToggle("SnowflakesToggle", {
-        Title = "Enable Snowflakes",
-        Description = "Toggle falling snowflakes effect",
-        Default = SnowflakesConfig.Enabled,
-        Callback = function(value)
-            Library:UpdateSnowflakesConfig({Enabled = value})
-        end
+    -- Удаляем старые снежинки если есть
+    self:RemoveSnowflakes()
+    
+    -- Создаем контейнер
+    SnowflakesContainer = Creator.New("Frame", {
+        Name = "SnowflakesContainer",
+        Size = UDim2.fromScale(1, 1),
+        BackgroundTransparency = 1,
+        ClipsDescendants = false,
+        Parent = GUI,
+        ZIndex = 999999,
     })
     
-    -- Количество снежинок
-    local snowCount = section:AddSlider("SnowflakesCount", {
-        Title = "Snowflakes Count",
-        Description = "Number of snowflakes (0-100)",
-        Default = SnowflakesConfig.Count,
-        Min = 10,
-        Max = 100,
-        Rounding = 1,
-        Callback = function(value)
-            Library:UpdateSnowflakesConfig({Count = value})
-        end
-    })
+    -- Создаем снежинки
+    for i = 1, SnowflakesConfig.Count do
+        local size = math.random(5, 15)
+        local startX = math.random(0, 100) / 100
+        
+        local snowflake = Creator.New("Frame", {
+            Name = "Snowflake_" .. i,
+            Size = UDim2.fromOffset(size, size),
+            Position = UDim2.new(startX, 0, math.random(-100, -10) / 100, 0),
+            BackgroundTransparency = 0.2,
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            BorderSizePixel = 0,
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Parent = SnowflakesContainer,
+            ZIndex = 999999,
+        }, {
+            Creator.New("UICorner", {
+                CornerRadius = UDim.new(1, 0),
+            }),
+        })
+        
+        table.insert(Snowflakes, {
+            Frame = snowflake,
+            Speed = math.random(80, 120) / 100 * (SnowflakesConfig.Speed / 50),
+            Size = size,
+            OriginalX = startX,
+        })
+    end
     
-    -- Скорость падения
-    local snowSpeed = section:AddSlider("SnowflakesSpeed", {
-        Title = "Snowflakes Speed",
-        Description = "Falling speed of snowflakes (0-100)",
-        Default = SnowflakesConfig.Speed,
-        Min = 0,
-        Max = 100,
-        Rounding = 1,
-        Callback = function(value)
-            Library:UpdateSnowflakesConfig({Speed = value})
-        end
-    })
+    -- Запускаем анимацию
+    if not SnowflakesRunning then
+        SnowflakesRunning = true
+        task.spawn(function()
+            local lastTime = tick()
+            
+            while SnowflakesRunning and #Snowflakes > 0 and SnowflakesContainer and SnowflakesContainer.Parent do
+                local currentTime = tick()
+                local deltaTime = currentTime - lastTime
+                lastTime = currentTime
+                
+                for i, snowflake in ipairs(Snowflakes) do
+                    if snowflake.Frame and snowflake.Frame.Parent then
+                        local currentPos = snowflake.Frame.Position
+                        local newY = currentPos.Y.Scale + (snowflake.Speed * deltaTime * 0.5)
+                        
+                        if newY > 1.1 then
+                            newY = math.random(-100, -10) / 100
+                            snowflake.OriginalX = math.random(0, 100) / 100
+                            snowflake.Speed = math.random(80, 120) / 100 * (SnowflakesConfig.Speed / 50)
+                        end
+                        
+                        snowflake.Frame.Position = UDim2.new(snowflake.OriginalX, 0, newY, 0)
+                    end
+                end
+                
+                task.wait(1/60)
+            end
+        end)
+    end
 end
 
--- Функция для получения текущей конфигурации снежинок
-function Library:GetSnowflakesConfig()
-    return table.clone(SnowflakesConfig)
-end
+-- Функция для удаления снежинок
+function Library:RemoveSnowflakes()
+    SnowflakesRunning = false
+    
+    if SnowflakesContainer then
+        SnowflakesContainer:Destroy()
+        SnowflakesContainer = nil
+    end
+    
+    Snowflakes = {}
+end   
 
 if RunService:IsStudio() then task.wait(0.01) end
 return Library, SaveManager, InterfaceManager, Mobile
