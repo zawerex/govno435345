@@ -11223,8 +11223,8 @@ function Library:AddSnowfallToWindow(Config)
     snowContainer.Parent = Library.Window.Root
     
     snowfall.instance = SnowModule:Init(snowContainer, {
-        Count = 30,
-        Speed = 5
+        Count = 50,
+        Speed = 9
     })
     
     function snowfall:SetVisible(visible)
