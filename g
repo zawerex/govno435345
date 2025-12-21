@@ -11064,55 +11064,52 @@ AddSignal(MobileMinimizeButton.MouseButton1Click, function()
 end)
 
 -- ==============================================
--- СНЕЖИНКИ (АВТОМАТИЧЕСКИЕ)
+-- СНЕЖИНКИ (ВНУТРИ ОКНА)
 -- ==============================================
 
 -- Конфигурация снежинок
 local SnowflakesConfig = {
     Enabled = true,
-    Count = 30,
-    Speed = 50,
+    Count = 30,          -- Количество снежинок
+    Speed = 50,          -- Скорость падения
 }
 
 local Snowflakes = {}
-local SnowflakesContainer = nil
 local SnowflakesRunning = false
+local CurrentWindow = nil  -- Текущее окно для снежинок
 
--- Функция для создания снежинок (вызывается автоматически)
-function Library:CreateSnowflakes()
+-- Функция для создания снежинок
+function Library:CreateSnowflakes(window)
     if not SnowflakesConfig.Enabled then return end
+    if not window or not window.Root then return end
+    
+    CurrentWindow = window
     
     -- Удаляем старые снежинки если есть
     self:RemoveSnowflakes()
     
-    -- Создаем контейнер
-    SnowflakesContainer = Creator.New("Frame", {
-        Name = "SnowflakesContainer",
-        Size = UDim2.fromScale(1, 1),
-        BackgroundTransparency = 1,
-        ClipsDescendants = false,
-        Parent = GUI,
-        ZIndex = 999999,
-    })
-    
-    -- Создаем снежинки
+    -- Создаем снежинки внутри окна
     for i = 1, SnowflakesConfig.Count do
+        -- Рандомный размер от 5 до 15
         local size = math.random(5, 15)
+        
+        -- Рандомная стартовая позиция в пределах окна
         local startX = math.random(0, 100) / 100
         
+        -- Создаем снежинку как дочерний элемент окна
         local snowflake = Creator.New("Frame", {
             Name = "Snowflake_" .. i,
             Size = UDim2.fromOffset(size, size),
-            Position = UDim2.new(startX, 0, math.random(-100, -10) / 100, 0),
+            Position = UDim2.new(startX, 0, -0.1, 0),  -- Начинаем чуть выше окна
             BackgroundTransparency = 0.2,
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255),  -- Белый
             BorderSizePixel = 0,
             AnchorPoint = Vector2.new(0.5, 0.5),
-            Parent = SnowflakesContainer,
-            ZIndex = 999999,
+            Parent = window.Root,  -- Важно: родитель - окно
+            ZIndex = 9999,  -- Высокий ZIndex чтобы было поверх других элементов
         }, {
             Creator.New("UICorner", {
-                CornerRadius = UDim.new(1, 0),
+                CornerRadius = UDim.new(1, 0),  -- Круглая форма
             }),
         })
         
@@ -11121,6 +11118,7 @@ function Library:CreateSnowflakes()
             Speed = math.random(80, 120) / 100 * (SnowflakesConfig.Speed / 50),
             Size = size,
             OriginalX = startX,
+            Window = window,
         })
     end
     
@@ -11130,27 +11128,55 @@ function Library:CreateSnowflakes()
         task.spawn(function()
             local lastTime = tick()
             
-            while SnowflakesRunning and #Snowflakes > 0 and SnowflakesContainer and SnowflakesContainer.Parent do
+            while SnowflakesRunning and #Snowflakes > 0 and CurrentWindow and CurrentWindow.Root and CurrentWindow.Root.Parent do
                 local currentTime = tick()
                 local deltaTime = currentTime - lastTime
                 lastTime = currentTime
                 
                 for i, snowflake in ipairs(Snowflakes) do
-                    if snowflake.Frame and snowflake.Frame.Parent then
+                    if snowflake.Frame and snowflake.Frame.Parent and snowflake.Window and snowflake.Window.Root then
                         local currentPos = snowflake.Frame.Position
+                        
+                        -- Падение вниз (вертикально)
                         local newY = currentPos.Y.Scale + (snowflake.Speed * deltaTime * 0.5)
                         
+                        -- Если снежинка упала ниже окна (с учетом прозрачности)
                         if newY > 1.1 then
-                            newY = math.random(-100, -10) / 100
-                            snowflake.OriginalX = math.random(0, 100) / 100
-                            snowflake.Speed = math.random(80, 120) / 100 * (SnowflakesConfig.Speed / 50)
+                            -- Плавное исчезновение
+                            local tween = TweenService:Create(
+                                snowflake.Frame,
+                                TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                                {BackgroundTransparency = 1}
+                            )
+                            tween:Play()
+                            
+                            -- Ждем немного и возвращаем снежинку наверх
+                            task.wait(0.3)
+                            
+                            if snowflake.Frame and snowflake.Frame.Parent then
+                                -- Возвращаем наверх с новыми параметрами
+                                snowflake.Frame.BackgroundTransparency = 0.2
+                                newY = -0.1
+                                snowflake.OriginalX = math.random(0, 100) / 100
+                                snowflake.Speed = math.random(80, 120) / 100 * (SnowflakesConfig.Speed / 50)
+                                snowflake.Size = math.random(5, 15)
+                                snowflake.Frame.Size = UDim2.fromOffset(snowflake.Size, snowflake.Size)
+                            end
                         end
                         
-                        snowflake.Frame.Position = UDim2.new(snowflake.OriginalX, 0, newY, 0)
+                        -- Обновляем позицию
+                        if snowflake.Frame and snowflake.Frame.Parent then
+                            snowflake.Frame.Position = UDim2.new(
+                                snowflake.OriginalX, 
+                                0, 
+                                newY, 
+                                0
+                            )
+                        end
                     end
                 end
                 
-                task.wait(1/60)
+                task.wait(1/60)  -- 60 FPS
             end
         end)
     end
@@ -11160,12 +11186,14 @@ end
 function Library:RemoveSnowflakes()
     SnowflakesRunning = false
     
-    if SnowflakesContainer then
-        SnowflakesContainer:Destroy()
-        SnowflakesContainer = nil
+    for _, snowflake in ipairs(Snowflakes) do
+        if snowflake.Frame and snowflake.Frame.Parent then
+            snowflake.Frame:Destroy()
+        end
     end
     
     Snowflakes = {}
+    CurrentWindow = nil
 end
 
 -- Автоматически создаем снежинки при создании окна
@@ -11173,10 +11201,10 @@ local oldCreateWindow = Library.CreateWindow
 Library.CreateWindow = function(self, config)
     local window = oldCreateWindow(self, config)
     
-    -- Создаем снежинки через 0.5 секунды после создания окна
+    -- Создаем снежинки через 0.1 секунды после создания окна
     task.spawn(function()
-        task.wait(0.5)
-        self:CreateSnowflakes()
+        task.wait(0.1)
+        self:CreateSnowflakes(window)
     end)
     
     return window
